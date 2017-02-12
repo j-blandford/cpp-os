@@ -62,7 +62,7 @@ _boot:
 .end:
 
 ;%include "kernel/arch/i686/ports.s"
-;%include "kernel/arch/i386/gdt-flush.s"
+%include "kernel/cpu/gdt.s"
 ; %include "kernel/arch/i686/tss-flush.s"
 ;%include "kernel/arch/i386/idt-flush.s"
 ;%include "kernel/arch/i386/interrupts.s"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 struct gdt_info {
 	unsigned short limit_low;

@@ -49,6 +49,7 @@ void setpx(unsigned int x, unsigned int y, color_rgba col)
 {
     if(x>=frame_width || y>=frame_height)
         return;
+        
     unsigned where = x*(frame_depth/8) + y*frame_pitch;
     bb_loc[where + 0] = col.b;
     bb_loc[where + 1] = col.g;

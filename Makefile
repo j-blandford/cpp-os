@@ -28,8 +28,7 @@ KERNEL_HEADERS = $(shell find kernel/include/ -type f -name '*.h')
 # LIBC_OBJS+= $(patsubst %.c,%.o,$(wildcard libc/*/*/*/*.c))
 # LIBC_HEADERS = $(shell find libc/include/ -type f -name '*.h')
 
-KERNEL_ASMOBJS = $(patsubst %.S,%.o,$(wildcard kernel/*.S))
-KERNEL_ASMOBJS+= $(patsubst %.s,%.o,$(wildcard kernel/*.s))
+KERNEL_ASMOBJS = $(patsubst %.s,%.o,$(wildcard kernel/*.s))
 
 ################################################################################################
 # Lets go!
@@ -65,6 +64,8 @@ run: install myos.iso
 
 clean:
 	@-rm -f kernel/*.o
+	@-rm -f kernel/*/*.o
+	@-rm -f kernel/*/*/*.o
 	@-rm -f sysroot/boot/myos.elf
 	@-rm -rf isodir
 	@-rm -f libc/*.o
@@ -108,7 +109,7 @@ KERNEL_GCC = ${KTARGET}-gcc
 KERNEL_GPP = ${KTARGET}-g++
 
 # This assembles the object files and links them into the finished kernel file
-build-kernel: ${KERNEL_OBJS}
+build-kernel: ${KERNEL_ASMOBJS} ${KERNEL_OBJS} ${KERNEL_ASMOBJS}
 	@${NASM} ${NASM_FLAGS} kernel/boot.s
 	@${KERNEL_GPP} -T kernel/arch/i386/linker.ld ${CPPFLAGS} -o sysroot/boot/myos.elf ${KERNEL_ASMOBJS} ${KERNEL_OBJS}
 	@${INFO} "---->" "Kernel built..."
