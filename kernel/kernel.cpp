@@ -87,7 +87,7 @@ void terminal_initialize(void) {
 	}
 
    string init_string = "Terminal Initialised"; 
-   init_string += string(" - C++ functions enabled!"); 
+   init_string += string(" - C++ functions enabled! "); 
 
    terminal_writestring((char * )init_string); 
 }

@@ -85,7 +85,15 @@ public:
   friend string operator+( const string& s, char c );
   friend string operator+( char c, const string& s );
 
-  friend string operator+=( const string& s1, const string& s2 );
+  string& operator+=( const string& s2 )
+  {
+    my_strncpy( this->buff + this->length, s2.buff, s2.length);
+
+    this->length += s2.length;
+  
+    return *this;
+  }
+
 
   operator char*() const { return this->buff; };
   
@@ -108,18 +116,6 @@ public:
 // Most of the time it's a temporary that will shortly be destroyed.
 
 string operator+( const string& s1, const string& s2 )
-{
-  string res;
-  res.length = s1.length + s2.length;
-  res.buff = new char[ res.length ];
-  my_strncpy( res.buff, s1.buff, s1.length );
-  my_strncpy( res.buff + s1.length,            // pointer arithmetic! 
-	      s2.buff, 
-	      s2.length );
-  return res;
-}
-
-string operator+=( const string& s1, const string& s2 )
 {
   string res;
   res.length = s1.length + s2.length;
