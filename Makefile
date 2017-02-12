@@ -93,9 +93,10 @@ clean:
 # CFLAGS += -D_KERNEL_
 # ASMFLAGS = --32
 
-CPPFLAGS  = -O1 -std=gnu++11 -nostdinc++
+CPPFLAGS  = -O2 -std=gnu++11 -nostdinc++
 CPPFLAGS += -finline-functions -ffreestanding -nostdlib
 CPPFLAGS += -Wall -Wextra -fno-exceptions -Warray-bounds -fno-rtti
+CPPFLAGS += -Wno-write-strings
 CPPFLAGS += -DKERNEL
 
 
@@ -108,14 +109,13 @@ KERNEL_GPP = ${KTARGET}-g++
 
 # This assembles the object files and links them into the finished kernel file
 build-kernel: ${KERNEL_OBJS}
-#	@${NASM} ${NASM_FLAGS} kernel/boot.s
-	i686-elf-as kernel/boot.s -o kernel/boot.o
+	@${NASM} ${NASM_FLAGS} kernel/boot.s
 	@${KERNEL_GPP} -T kernel/arch/i386/linker.ld ${CPPFLAGS} -o sysroot/boot/myos.elf ${KERNEL_ASMOBJS} ${KERNEL_OBJS}
 	@${INFO} "---->" "Kernel built..."
 
 # This provides the object files for the target "build-kernel"
 kernel/%.o: kernel/%.cpp ${KERNEL_HEADERS}
-	@${KERNEL_GPP} ${CPPFLAGS} -g -c -o $@ $< ${ERRORS}
+	@${KERNEL_GPP} ${CPPFLAGS} -g -c -I./kernel/include -o $@ $< ${ERRORS}
 
 # Compiles .s (boot.s, etc.) into object files with NASM
 kernel/boot.o:

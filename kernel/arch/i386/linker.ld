@@ -2,14 +2,17 @@ ENTRY(_start)
 phys = 0x00100000;
 SECTIONS
 {
+      ._multiboot_header : {
+        *(._multiboot_header)
+      }
+
       . = 1M;
 
       start = .; _start = .; __start = .;
-
+      
       .text phys : AT(phys)
       {
         code = .;
-        *(._multiboot_header)
         *(.text)
         *(.rodata)
       }
