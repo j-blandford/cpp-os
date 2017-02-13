@@ -13,6 +13,8 @@ bits 32
 
 extern code, bss, end, kernel_main
 
+; put the multiboot header within the first 8kb of the kernel.
+; this is achieved in the linker script
 section ._multiboot_header
 
 align 4
@@ -27,7 +29,7 @@ _multiboot_header:
                 dd end                      ;
                 dd _boot                    ; entry point
 
-                dd 1                        ; Linear graphics mode
+                dd 0                        
                 dd 0                    ; No preferred width
                 dd 0                      ; No preferred height
                 db 0                       ; 32 bpp
@@ -61,7 +63,6 @@ _boot:
                   jmp .halt
 .end:
 
-;%include "kernel/arch/i686/ports.s"
 %include "kernel/cpu/gdt.s"
 %include "kernel/cpu/idt.s"
 %include "kernel/cpu/interrupts.s"

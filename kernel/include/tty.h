@@ -11,7 +11,7 @@ void terminal_writelog(const char* data);
 void terminal_writeerror(const char* data);
 
 void terminal_initialize(void);
-void terminal_putchar(char c, color_rgba color);
+void terminal_putchar(char c, RGBA color);
 void terminal_clear(void);
 
 void terminal_write(const char* data, size_t size);

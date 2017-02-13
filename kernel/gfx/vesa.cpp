@@ -15,48 +15,44 @@ uint8_t     *fb_loc;
 uint8_t     *bb_loc; // back-buffer
 
 
-const color_rgba color_transparency = {0x00, 0x00, 0x00, 0x00};
-const color_rgba color_black        = {0x00, 0x00, 0x00, 0xFF};
-const color_rgba color_red          = {0xFF, 0x00, 0x00, 0xFF};
-const color_rgba color_green        = {0x00, 0xFF, 0x00, 0xFF};
-const color_rgba color_blue         = {0x00, 0x00, 0xFF, 0xFF};
-const color_rgba color_cyan         = {0x00, 0xFF, 0xFF, 0xFF};
-const color_rgba color_magenta      = {0xFF, 0x00, 0xFF, 0xFF};
-const color_rgba color_yellow       = {0xFF, 0xFF, 0x00, 0xFF};
-const color_rgba color_gray         = {0x77, 0x77, 0x77, 0xFF};
-const color_rgba color_light_gray   = {0xED, 0xED, 0xED, 0xFF};
-const color_rgba color_white        = {0xFF, 0xFF, 0xFF, 0xFF};
+const RGBA color_transparency(0x00, 0x00, 0x00, 0x00);
+const RGBA color_black(0x00, 0x00, 0x00, 0xFF);
+const RGBA color_red(0xFF, 0x00, 0x00, 0xFF);
+const RGBA color_green(0x00, 0xFF, 0x00, 0xFF);
+const RGBA color_blue(0x00, 0x00, 0xFF, 0xFF);
+const RGBA color_cyan(0x00, 0xFF, 0xFF, 0xFF);
+const RGBA color_magenta(0xFF, 0x00, 0xFF, 0xFF);
+const RGBA color_yellow(0xFF, 0xFF, 0x00, 0xFF);
+const RGBA color_gray(0x77, 0x77, 0x77, 0xFF);
+const RGBA color_light_gray(0xED, 0xED, 0xED, 0xFF);
+const RGBA color_white(0xFF, 0xFF, 0xFF, 0xFF);
 
 
 void putpx(unsigned int x, unsigned int y, uint32_t color)
 {
-    color_rgba col;
-    col.r = color >> 16;
-    col.g = color >> 8;
-    col.b = color;
-    col.a = 0xFF;
+    RGBA col(color);
 
     if(x>=frame_width || y>=frame_height)
         return;
     unsigned where = x*(frame_depth/8) + y*frame_pitch;
-    bb_loc[where + 0] = col.b;
-    bb_loc[where + 1] = col.g;
-    bb_loc[where + 2] = col.r;
+    fb_loc[where + 0] = col.b;
+    fb_loc[where + 1] = col.g;
+    fb_loc[where + 2] = col.r;
     
 }
 
-void setpx(unsigned int x, unsigned int y, color_rgba col)
+void setpx(unsigned int x, unsigned int y, RGBA col)
 {
     if(x>=frame_width || y>=frame_height)
         return;
         
     unsigned where = x*(frame_depth/8) + y*frame_pitch;
-    bb_loc[where + 0] = col.b;
-    bb_loc[where + 1] = col.g;
-    bb_loc[where + 2] = col.r;
+    fb_loc[where + 0] = col.b;
+    fb_loc[where + 1] = col.g;
+    fb_loc[where + 2] = col.r;
 }
 
-void fill_circle(const uint32_t x, const uint32_t y, uint16_t radius, color_rgba color)
+void fill_circle(const uint32_t x, const uint32_t y, uint16_t radius, RGBA color)
 {
     while(radius > 0)
     {
@@ -93,7 +89,7 @@ void fill_circle(const uint32_t x, const uint32_t y, uint16_t radius, color_rgba
     }
 }
 
-void draw_circle(const uint32_t x, const uint32_t y, uint16_t radius, color_rgba color)
+void draw_circle(const uint32_t x, const uint32_t y, uint16_t radius, RGBA color)
 {
     unsigned xm=0;
     int delta=1-2*radius, error=0, ym=radius;
@@ -138,7 +134,7 @@ void init_fbe(multiboot_info_t * mb_info) {
 
 
 
-void drawchar_transparent(unsigned char c, int x, int y, color_rgba fgcolor) {
+void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 	int cx,cy;
 	int mask[8]={1,2,4,8,16,32,64,128};
 
@@ -155,5 +151,5 @@ void drawchar_transparent(unsigned char c, int x, int y, color_rgba fgcolor) {
 void update_buffer() {
 
     // Copy back buffer to front buffer in one big chunk
-   memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
+   //memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
 }
