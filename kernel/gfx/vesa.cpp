@@ -14,20 +14,6 @@ unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 uint8_t     *fb_loc;
 uint8_t     *bb_loc; // back-buffer
 
-
-const RGBA color_transparency(0x00, 0x00, 0x00, 0x00);
-const RGBA color_black(0x00, 0x00, 0x00, 0xFF);
-const RGBA color_red(0xFF, 0x00, 0x00, 0xFF);
-const RGBA color_green(0x00, 0xFF, 0x00, 0xFF);
-const RGBA color_blue(0x00, 0x00, 0xFF, 0xFF);
-const RGBA color_cyan(0x00, 0xFF, 0xFF, 0xFF);
-const RGBA color_magenta(0xFF, 0x00, 0xFF, 0xFF);
-const RGBA color_yellow(0xFF, 0xFF, 0x00, 0xFF);
-const RGBA color_gray(0x77, 0x77, 0x77, 0xFF);
-const RGBA color_light_gray(0xED, 0xED, 0xED, 0xFF);
-const RGBA color_white(0xFF, 0xFF, 0xFF, 0xFF);
-
-
 void putpx(unsigned int x, unsigned int y, uint32_t color)
 {
     RGBA col(color);
@@ -35,9 +21,9 @@ void putpx(unsigned int x, unsigned int y, uint32_t color)
     if(x>=frame_width || y>=frame_height)
         return;
     unsigned where = x*(frame_depth/8) + y*frame_pitch;
-    fb_loc[where + 0] = col.b;
-    fb_loc[where + 1] = col.g;
-    fb_loc[where + 2] = col.r;
+    bb_loc[where + 0] = col.b;
+    bb_loc[where + 1] = col.g;
+    bb_loc[where + 2] = col.r;
     
 }
 
@@ -47,9 +33,9 @@ void setpx(unsigned int x, unsigned int y, RGBA col)
         return;
         
     unsigned where = x*(frame_depth/8) + y*frame_pitch;
-    fb_loc[where + 0] = col.b;
-    fb_loc[where + 1] = col.g;
-    fb_loc[where + 2] = col.r;
+    bb_loc[where + 0] = col.b;
+    bb_loc[where + 1] = col.g;
+    bb_loc[where + 2] = col.r;
 }
 
 void fill_circle(const uint32_t x, const uint32_t y, uint16_t radius, RGBA color)
@@ -127,8 +113,6 @@ void init_fbe(multiboot_info_t * mb_info) {
 
     frame_pitch = mb_info->framebuffer_pitch;
 
-
-    //bb_loc = (uint8_t*)(int)mb_info->framebuffer_addr; //
     bb_loc = (uint8_t*)(int)malloc(frame_height*frame_pitch);
 }
 
@@ -149,7 +133,11 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 }
 
 void update_buffer() {
-
     // Copy back buffer to front buffer in one big chunk
-   //memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
+   memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
+}
+
+void update_buffer(uint8_t start, uint8_t end) {
+    // Copy back buffer to front buffer between 2 memory references
+   memcpy((uint8_t *)fb_loc[start], (uint8_t *)bb_loc[start], end-start);
 }

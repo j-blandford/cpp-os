@@ -19,7 +19,9 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	init_fbe(mb_info);
 
 	terminal_initialize(); 
-	terminal_writestring("Hello, kernel World!\n"); 
+
+
+	setpx(100,100,RGBA(0x00FF00));
 
 	gdt_install();
 	idt_install();
@@ -31,8 +33,8 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	char buffer[1024];
 
 	while (true) {
-		terminal_writestring_color("kernel", VGA_COLOR_LIGHT_GREY);
-		terminal_writestring_color("> ", VGA_COLOR_WHITE);
+		terminal_writestring("kernel", RGBA(0xDDDDDD));
+		terminal_writestring("> ", RGBA(0xFFFFFF));
 		update_buffer();
 
 		getsn(&buffer[0], 1024);

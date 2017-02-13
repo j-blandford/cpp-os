@@ -14,10 +14,10 @@ static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
-static size_t terminal_row;
-static size_t terminal_column;
-static uint8_t terminal_color;
-static uint16_t* terminal_buffer;
+size_t terminal_row;
+size_t terminal_column;
+uint8_t terminal_color;
+uint16_t* terminal_buffer;
 
 static int X_FONTWIDTH = 8;
 static int Y_FONTWIDTH = 12; 
@@ -43,17 +43,17 @@ void terminal_initialize(void) {
     terminal_writestring((char * )init_string); 
 }
 
-void terminal_writelog(const char* data) {
+void terminal_writelog(char* data) {
 	terminal_writestring("[ ");
-	terminal_writestring_color("LOG", VGA_COLOR_GREEN);
+	terminal_writestring("LOG", RGBA(0x00FF00));
 	terminal_writestring(" ] ");
 	terminal_writestring(data);
 	terminal_writestring("\n");
 }
 
-void terminal_writeerror(const char* data) {
+void terminal_writeerror(char* data) {
 	terminal_writestring("[ ");
-	terminal_writestring_color("ERR", VGA_COLOR_LIGHT_RED);
+	terminal_writestring("ERR", RGBA(0xFF0000));
 	terminal_writestring(" ] ");
 	terminal_writestring(data);
 	terminal_writestring("\n");
@@ -118,37 +118,26 @@ void terminal_putchar(char c, RGBA color) {
 	}
 
 	update_cursor(terminal_row, terminal_column);
-//	update_buffer();
 }
 
-void terminal_write(const char* data, size_t size) {
-
+void terminal_writestring(char* data) {
 	if(terminal_row == VGA_HEIGHT) {
 		terminal_scrollup();
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		terminal_putchar(data[i], color_white);
+	for (char* it = data; *it; ++it) {
+		terminal_putchar((*it), RGBA(0xFFFFFF));
 	}
 }
 
-void terminal_write_color(const char* data, size_t size, uint8_t color) {
-
+void terminal_writestring(char* data, RGBA color) {
 	if(terminal_row == VGA_HEIGHT) {
 		terminal_scrollup();
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		terminal_putchar(data[i], color_white);
+	for (char* it = data; *it; ++it) {
+		terminal_putchar((*it), color);
 	}
-}
-
-void terminal_writestring(const char* data) {
-	terminal_write(data, strlen((char * )data));
-}
-
-void terminal_writestring_color(const char* data, uint8_t color) {
-	terminal_write_color(data, strlen((char * )data), color);
 }
 
 size_t tty_get_cursor_x() {
@@ -165,9 +154,9 @@ void update_cursor(int row, int col)
 {
 	unsigned short position=(row*80) + col;
 
-	terminal_putentryat('|', color_black, cursor_pos.x, cursor_pos.y); // remove old caret
+	terminal_putentryat('|', RGBA(0x000000), cursor_pos.x, cursor_pos.y); // remove old caret
 
-	terminal_putentryat('|', color_green, col+1, row);
+	terminal_putentryat('|', RGBA(0x00FF00), col+1, row);
 
 	cursor_pos.x = col+1;
 	cursor_pos.y = row;

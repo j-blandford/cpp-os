@@ -30,9 +30,9 @@ _multiboot_header:
                 dd _boot                    ; entry point
 
                 dd 0                        
-                dd 0                    ; No preferred width
-                dd 0                      ; No preferred height
-                db 0                       ; 32 bpp
+                dd 640                    ; No preferred width
+                dd 480                      ; No preferred height
+                db 24                       ; 32 bpp
                 
 section .text
 global _boot:function _boot.end-_boot
@@ -46,9 +46,9 @@ _boot:
 
                   mov esp, stack            ; setup stack
 
-                ;   push stack                ; pass stack start
-                ;   push STACK_SIZE           ; and size to the kernel
-                ;   push ebx                  ; and don't forget a pointer to the multiboot header
+                  push stack                ; pass stack start
+                  push STACK_SIZE           ; and size to the kernel
+                  push ebx                  ; and don't forget a pointer to the multiboot header
 
                   cmp eax, MB_EAX_MAGIC     ; magic is in the air
 

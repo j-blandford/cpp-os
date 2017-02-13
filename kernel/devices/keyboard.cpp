@@ -88,11 +88,11 @@ char * getsn(char * str, size_t max) {
         } 
         else if (c == '\b') {
             if (i > 0) {
-                terminal_putchar(' ', color_white);
+                terminal_putchar(' ', RGBA(0xFFFFFF));
                 tty_set_cursor_x(tty_get_cursor_x()-2);
-                terminal_putchar(' ', color_white);
+                terminal_putchar(' ', RGBA(0xFFFFFF));
                 tty_set_cursor_x(tty_get_cursor_x()-2);
-                terminal_putchar(' ', color_white);
+                terminal_putchar(' ', RGBA(0xFFFFFF));
                 tty_set_cursor_x(tty_get_cursor_x()-1);
                 i = i - 1;
             } 
@@ -126,7 +126,10 @@ static void keyboard_irq1(struct registers * registers) {
         char c = (char)keyboard_map[(uint8_t)keycode];
         buffer_write(&keyboard_buffer, c);
 
-        if((int)c != 0) terminal_putchar(c, color_white);
+        if((int)c != 0) { 
+            terminal_putchar(c, RGBA(0xFFFFFF));
+            update_buffer();
+        }
     }
     return;
 }
