@@ -9,6 +9,7 @@
 #include <cpu/idt.h>
 
 #include <gfx/vesa.h>
+#include <gfx/surface.h>
 
 #include <devices/keyboard.h>
 
@@ -20,8 +21,32 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 
 	terminal_initialize(); 
 
+	char str_mem_buff[50] = {0};
+	sprintf(str_mem_buff, "total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
+	terminal_writestring((char*)str_mem_buff);
 
-	setpx(100,100,RGBA(0x00FF00));
+	// char str_mb_buff[50] = {0};
+	// sprintf(str_mb_buff, "memory ptr:  %x \n",mb_info->mem_lower);
+	// terminal_writestring((char*)str_mb_buff);
+
+	char str_bb_buff[50] = {0};
+	sprintf(str_bb_buff, "vga:  %dx%d pitch: %d \n",frame_width, frame_height, frame_pitch);
+	terminal_writestring((char*)str_bb_buff);
+
+	// char str_fb_buff[50] = {0};
+	// sprintf(str_fb_buff, "frontbuffer ptr:  %x \n",fb_loc);
+	// terminal_writestring((char*)str_fb_buff);
+
+
+
+	//setpx(100,100,RGBA(0x00FF00));
+
+	Surface littleBox = Surface(Vector2(50,250), Vector2(50,50));
+	littleBox.setBackground(RGBA(0xFFFFFF));
+	littleBox.drawCircle(25, 25, 20, RGBA(0xFF0000));
+	littleBox.apply();
+
+	update_buffer();
 
 	gdt_install();
 	idt_install();

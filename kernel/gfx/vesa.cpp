@@ -8,8 +8,6 @@
 #include <gfx/vga.h>
 #include <gfx/vesa.h>
 #include <gfx/font.h>
-
-
 unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 uint8_t     *fb_loc;
 uint8_t     *bb_loc; // back-buffer
@@ -135,9 +133,4 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 void update_buffer() {
     // Copy back buffer to front buffer in one big chunk
    memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
-}
-
-void update_buffer(uint8_t start, uint8_t end) {
-    // Copy back buffer to front buffer between 2 memory references
-   memcpy((uint8_t *)fb_loc[start], (uint8_t *)bb_loc[start], end-start);
 }

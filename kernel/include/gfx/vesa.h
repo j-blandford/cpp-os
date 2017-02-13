@@ -37,6 +37,21 @@ public:
 
 };
 
+class Vector2 {
+public:
+    int32_t x;
+    int32_t y;
+
+    Vector2() {
+        (*this).x = 0;
+        (*this).y = 0;
+    }    
+    Vector2(int32_t x, int32_t y ) {
+        (*this).x = x;
+        (*this).y = y;
+    }
+};
+
 typedef struct {
     uint32_t x;
     uint32_t y;
@@ -65,7 +80,6 @@ const RGBA color_white = RGBA(0xFF, 0xFF, 0xFF, 0xFF);
 void init_fbe(multiboot_info_t * mb_info);
 
 void update_buffer();
-void update_buffer(uint8_t start, uint8_t end);
 
 void putpx(unsigned int x, unsigned int y, RGBA color);
 void setpx(unsigned int x, unsigned int y, RGBA col);
@@ -77,7 +91,7 @@ void       fill_circle(const uint32_t x, const uint32_t y,
 
 extern unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 extern uint8_t     *fb_loc;
-//extern uint8_t     *bb_loc; // back-buffer
+extern uint8_t     *bb_loc; // back-buffer
 
 // Font drawing and display functions
-void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor);
+void drawchar_transparent( unsigned char c, int x, int y, RGBA fgcolor);

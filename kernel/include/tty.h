@@ -26,3 +26,6 @@ void terminal_writestring(char* data, RGBA color);
 size_t tty_get_cursor_x();
 void tty_set_cursor_x(size_t x);
 void update_cursor(int row, int col);
+
+int printf(const char* __restrict, ...);
+int sprintf(char* buffer, const char* fmt, ...);
