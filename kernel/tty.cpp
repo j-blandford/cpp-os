@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <std/string.h>
 
-#include <string.h>
 #include <tty.h>
 
 #include <cpu/io.h>

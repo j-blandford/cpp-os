@@ -1,17 +1,10 @@
 #pragma once
 
 #include <stddef.h>
-#include <libcxx.h>
+#include <std.h>
 
-
-// Helper functions:
-//
-// my_strlen : count the length of a string until a null char
-//
-// my_strncpy : copy n chars from source to destination
 
 int strlen( char * ptr );
-
 void strncpy( char * ptr_dest, char * ptr_src, int n );
 
 class string {

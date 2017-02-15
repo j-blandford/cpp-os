@@ -1,5 +1,5 @@
 #include <limits.h>
-#include <libcxx.h>
+#include <std.h>
 #include <stdarg.h>
 
 /* Return the `ldiv_t' representation of NUMER over DENOM.  */
@@ -108,7 +108,7 @@ int putchar(int ic) {
 
 
 
-static bool print(const char* data, size_t length) {
+static bool print(char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
 		if (putchar(bytes[i]) == -1)
@@ -135,14 +135,14 @@ int printf(const char* format, ...) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-			if (!print(format, amount))
+			if (!print((char*)format, amount))
 				return -1;
 			format += amount;
 			written += amount;
 			continue;
 		}
 
-		const char* format_begun_at = format++;
+		char* format_begun_at = (char*)(format++);
 
 		if (*format == 'c') {
 			format++;
@@ -180,7 +180,7 @@ int printf(const char* format, ...) {
 			written++;
 		} else if (*format == 's') {
 			format++;
-			const char* str = va_arg(parameters, const char*);
+			char* str = va_arg(parameters, char*);
 			size_t len = strlen(str);
 
 			if (!print(str, len))
@@ -188,9 +188,9 @@ int printf(const char* format, ...) {
 			written += len;
 		} else {
 			format = format_begun_at;
-			size_t len = strlen(format);
+			size_t len = strlen((char*)format);
 
-			if (!print(format, len))
+			if (!print((char*)format, len))
 				return -1;
 			written += len;
 			format += len;
@@ -228,14 +228,14 @@ int sprintf(char* buffer, const char* format, ...) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-			if (!print(format, amount))
+			if (!print((char*)format, amount))
 				return -1;
 			format += amount;
 			written += amount;
 			continue;
 		}
 
-		const char* format_begun_at = format++;
+		char* format_begun_at = (char*)(format++);
 
 		if (*format == 'c') {
 			format++;
@@ -282,14 +282,14 @@ int sprintf(char* buffer, const char* format, ...) {
 		} 
 		else if (*format == 's') {
 			format++;
-			const char* str = va_arg(parameters, const char*);
+			char* str = va_arg(parameters, char*);
 			size_t len = strlen(str);
 
 			written += len;
 		} 
 		else {
 			format = format_begun_at;
-			size_t len = strlen(format);
+			size_t len = strlen((char*)format);
 
 			written += len;
 			format += len;

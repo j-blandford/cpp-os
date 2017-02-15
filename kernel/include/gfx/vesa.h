@@ -2,8 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-#include <string.h>
+#include <std/string.h>
 
 #include <cpu/multiboot.h>
 

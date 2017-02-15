@@ -1,7 +1,9 @@
 #include <stddef.h> 
 #include <stdint.h> 
 
-#include <string.h> 
+#include <std/string.h> 
+#include <std/vector.h>
+
 #include <tty.h>
 
 #include <cpu/multiboot.h>
@@ -41,10 +43,14 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 
 	//setpx(100,100,RGBA(0x00FF00));
 
-	Surface littleBox = Surface(Vector2(50,250), Vector2(50,50));
-	littleBox.setBackground(RGBA(0xFFFFFF));
-	littleBox.drawCircle(25, 25, 20, RGBA(0xFF0000));
-	littleBox.apply();
+	
+	std::vector<Surface> screen_surfaces;
+
+	// screen_surfaces.push_back(Surface(Vector2(50,250), Vector2(50,50)));
+
+	// screen_surfaces[0].setBackground(RGBA(0xFFFFFF));
+	// screen_surfaces[0].drawCircle(25, 25, 20, RGBA(0xFF0000));
+	// screen_surfaces[0].apply();
 
 	update_buffer();
 

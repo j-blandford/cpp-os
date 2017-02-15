@@ -5,6 +5,9 @@
 
 #include <memory.h>
 
+#include <std/string.h>
+#include <std/vector.h>
+
 // Structs for stdlib
 typedef struct {
     short quot, rem;
@@ -21,9 +24,11 @@ void operator delete(void *p);
 void operator delete[](void *p);
 
 // "String" functions
-size_t strlen(const char*);
+int strlen( char * ptr );
 char *strcat(char *dest, const char *source);
 int strncmp(const char *s1, const char *s2, size_t n);
+
+void strncpy( char * ptr_dest, char * ptr_src, int n );
 
 int putchar(int);
 

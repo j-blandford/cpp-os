@@ -1,13 +1,11 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <std/string.h>
+
+#include <tty.h>
 
 #include <cpu/io.h>
 #include <cpu/idt.h>
-
-#include <tty.h>
-#include <string.h>
-
-
 
 static idt_entry_t idt_entries[256];
 
