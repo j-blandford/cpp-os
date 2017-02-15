@@ -28,6 +28,10 @@ public:
     Vector2 pos;
     Vector2 dim;
 
+    Surface() {
+        
+    }
+
     Surface(Vector2 pos, Vector2 dim) {
         (*this).pos = pos;
         (*this).dim = dim;

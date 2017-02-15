@@ -20,13 +20,12 @@ SUCCESS = scripts/success.sh
 KERNEL_OBJS = $(patsubst %.cpp,%.o,$(wildcard kernel/*.cpp))
 KERNEL_OBJS+= $(patsubst %.cpp,%.o,$(wildcard kernel/*/*.cpp))
 KERNEL_OBJS+= $(patsubst %.cpp,%.o,$(wildcard kernel/*/*/*.cpp))
-KERNEL_HEADERS = $(shell find kernel/include/ -type f -name '*.h')
+KERNEL_HEADERS = $(shell find kernel/include -type f -name '*.h')
+KERNEL_HEADERS+= $(shell find kernel/include/std -type f -name '*.h')
 
-# Libc object files and header files
-# LIBC_OBJS = $(patsubst %.c,%.o,$(wildcard libc/*/*.c))
-# LIBC_OBJS+= $(patsubst %.c,%.o,$(wildcard libc/*/*/*.c))
-# LIBC_OBJS+= $(patsubst %.c,%.o,$(wildcard libc/*/*/*/*.c))
-# LIBC_HEADERS = $(shell find libc/include/ -type f -name '*.h')
+
+# std:: object files and header files
+#STD_OBJS = $(patsubst %.cpp,%.o,$(wildcard kernel/std/*.cpp))
 
 KERNEL_ASMOBJS = $(patsubst %.s,%.o,$(wildcard kernel/*.s))
 
@@ -96,9 +95,10 @@ clean:
 
 CPPFLAGS  = -O2 -std=gnu++11 -nostdinc++
 CPPFLAGS += -finline-functions -ffreestanding -nostdlib
-CPPFLAGS += -Wall -Wextra -fno-exceptions -Warray-bounds -fno-rtti
+CPPFLAGS += -Wall -Wextra -fno-exceptions -Warray-bounds
 CPPFLAGS += -Wno-write-strings
 CPPFLAGS += -DKERNEL
+# -fno-rtti
 
 
 NASM = nasm
@@ -109,7 +109,7 @@ KERNEL_GCC = ${KTARGET}-gcc
 KERNEL_GPP = ${KTARGET}-g++
 
 # This assembles the object files and links them into the finished kernel file
-build-kernel: ${KERNEL_ASMOBJS} ${KERNEL_OBJS} ${KERNEL_ASMOBJS}
+build-kernel: ${KERNEL_OBJS} ${KERNEL_ASMOBJS}
 	@${NASM} ${NASM_FLAGS} kernel/boot.s
 	@${KERNEL_GPP} -T kernel/arch/i386/linker.ld ${CPPFLAGS} -o sysroot/boot/myos.elf ${KERNEL_ASMOBJS} ${KERNEL_OBJS}
 	@${INFO} "---->" "Kernel built..."
@@ -126,3 +126,19 @@ install: clean build-kernel
 	@${SUCCESS} "*---------------------------------*"
 	@${SUCCESS} "*-*-*" "Install Success! :)"
 	@${SUCCESS} "*---------------------------------*"
+
+# if the first command line argument is "print"
+ifeq ($(firstword $(MAKECMDGOALS)),print)
+
+  # take the rest of the arguments as variable names
+  VAR_NAMES := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+
+  # turn them into do-nothing targets
+  $(eval $(RUN_ARGS):dummy;@:)
+
+  # then print them
+  .PHONY: print
+  print:
+		@$(foreach var,$(VAR_NAMES),\
+			echo '$(var) = $($(var))';)
+endif

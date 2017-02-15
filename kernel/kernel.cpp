@@ -1,8 +1,7 @@
 #include <stddef.h> 
 #include <stdint.h> 
 
-#include <std/string.h> 
-#include <std/vector.h>
+#include <std.h>
 
 #include <tty.h>
 
@@ -14,6 +13,18 @@
 #include <gfx/surface.h>
 
 #include <devices/keyboard.h>
+
+
+void init_screens() {
+	std::vector<Surface> screen_surfaces;
+	screen_surfaces.push_back(Surface(Vector2(50,250), Vector2(50,50)));
+
+	screen_surfaces[0].setBackground(RGBA(0xFFFFFF));
+	screen_surfaces[0].drawCircle(25, 25, 20, RGBA(0xFF0000));
+	screen_surfaces[0].apply();
+
+}
+
 
 extern "C"
 void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp) {
@@ -42,15 +53,7 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 
 
 	//setpx(100,100,RGBA(0x00FF00));
-
-	
-	std::vector<Surface> screen_surfaces;
-
-	// screen_surfaces.push_back(Surface(Vector2(50,250), Vector2(50,50)));
-
-	// screen_surfaces[0].setBackground(RGBA(0xFFFFFF));
-	// screen_surfaces[0].drawCircle(25, 25, 20, RGBA(0xFF0000));
-	// screen_surfaces[0].apply();
+	init_screens();
 
 	update_buffer();
 
