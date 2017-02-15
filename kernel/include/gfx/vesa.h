@@ -8,6 +8,8 @@
 
 #include <gfx/vga.h>
 
+#define SURF_SCREEN 0
+
 class RGBA {
 public:
     uint8_t r;

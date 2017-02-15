@@ -64,7 +64,7 @@ namespace std {
     void vector<T>::push_back(const T& value) {
 
         if(_size >= _capacity) {
-            reserve(_capacity*1.5);
+            reserve(_capacity*1.5); // 1.5 is a bit less than the golden ratio, perfect for our memory allocation uses
         }
 
         buffer[_size] = value;
@@ -107,4 +107,21 @@ namespace std {
 	T& vector<T>::operator[](size_t index) {
 		return buffer[index];
 	}
+
+    template<class T>
+    size_t vector<T>::capacity() const {
+        return _capacity;   
+    };
+
+    template<class T>
+    size_t vector<T>::size() const {
+        return _size;   
+    };
+
+    template<class T>
+    void vector<T>::clear() {
+        _size = 0;
+        _capacity = 0;
+        buffer = NULL;
+    }
 }

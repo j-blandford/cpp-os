@@ -17,11 +17,15 @@
 
 void init_screens() {
 	std::vector<Surface> screen_surfaces;
-	screen_surfaces.push_back(Surface(Vector2(50,250), Vector2(50,50)));
 
-	screen_surfaces[0].setBackground(RGBA(0xFFFFFF));
-	screen_surfaces[0].drawCircle(25, 25, 20, RGBA(0xFF0000));
-	screen_surfaces[0].apply();
+	screen_surfaces.push_back(Surface(Vector2(0,0), Vector2(frame_width,frame_height)));
+	screen_surfaces[SURF_SCREEN].setBackground(RGBA(0x2a2b31));
+	screen_surfaces[SURF_SCREEN].apply();
+
+	// screen_surfaces.push_back(Surface(Vector2(250,250), Vector2(50,50)));
+	// screen_surfaces[1].setBackground(RGBA(0xFFFFFF));
+	// screen_surfaces[1].drawCircle(25, 25, 20, RGBA(0xFF0000));
+	// screen_surfaces[1].apply();
 
 }
 
@@ -31,6 +35,7 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	interrupts_disable();
 
 	init_fbe(mb_info);
+	init_screens();
 
 	terminal_initialize(); 
 
@@ -43,17 +48,8 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	// terminal_writestring((char*)str_mb_buff);
 
 	char str_bb_buff[50] = {0};
-	sprintf(str_bb_buff, "vga:  %dx%d pitch: %d \n",frame_width, frame_height, frame_pitch);
+	sprintf(str_bb_buff, "vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);
 	terminal_writestring((char*)str_bb_buff);
-
-	// char str_fb_buff[50] = {0};
-	// sprintf(str_fb_buff, "frontbuffer ptr:  %x \n",fb_loc);
-	// terminal_writestring((char*)str_fb_buff);
-
-
-
-	//setpx(100,100,RGBA(0x00FF00));
-	init_screens();
 
 	update_buffer();
 

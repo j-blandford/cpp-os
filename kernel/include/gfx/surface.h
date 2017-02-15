@@ -40,7 +40,7 @@ public:
 
         float pitchRatio = (float)frame_pitch / (float)frame_width;
 
-        (*this).s_pitch = frame_pitch; //pitchRatio*dim.x; 
+        (*this).s_pitch = pitchRatio*dim.x; 
 
         (*this).buff_loc = (uint8_t*)malloc(dim.y*(*this).s_pitch);
     }
