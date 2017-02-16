@@ -12,6 +12,9 @@ extern size_t terminal_column;
 extern uint8_t terminal_color;
 extern uint16_t* terminal_buffer;
 
+// TODO: turn this into a class which either creates, or uses an existing, surface object
+//  this will allow us to have terminal windows :)
+
 
 void terminal_writelog(char* data);
 void terminal_writeerror(char* data);
@@ -22,6 +25,8 @@ void terminal_clear(void);
 
 void terminal_writestring(char* data);
 void terminal_writestring(char* data, RGBA color);
+
+void terminal_printf(const char* fmt, ...);
 
 size_t tty_get_cursor_x();
 void tty_set_cursor_x(size_t x);

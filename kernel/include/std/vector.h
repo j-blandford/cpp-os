@@ -48,8 +48,8 @@ namespace std {
 
     template<class T>
     vector<T>::vector(const vector<T>& vec) :
-        _capacity(vec.capacity),
-        _size(vec.size),
+        _capacity(vec._capacity),
+        _size(vec._size),
         buffer(NULL) 
     { 
         for(size_t i = 0; i < _size; i++) {

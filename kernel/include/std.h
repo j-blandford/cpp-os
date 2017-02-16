@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #include <memory.h>
 
@@ -34,10 +35,11 @@ int putchar(int);
 
 int printf(const char* __restrict, ...);
 int sprintf(char* buffer, const char* fmt, ...);
+int vsprintf(char* buffer, const char* format, va_list parameters);
 
 // Long-functions
 ldiv_t ldiv (unsigned long numerator, unsigned long denominator );
 char* ltoa(unsigned long long value, char* buffer, int radix );
 
 // Integer functions
-char* itoa (int value, char* result, int base);
+int itoa(int value, char *sp, int radix);

@@ -2,13 +2,16 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include <std/string.h>
+#include <std/vector.h>
 
 #include <cpu/multiboot.h>
 
 #include <gfx/vga.h>
 
 #define SURF_SCREEN 0
+
 
 class RGBA {
 public:
@@ -79,6 +82,8 @@ const RGBA color_white = RGBA(0xFF, 0xFF, 0xFF, 0xFF);
 
 // front-buffer, grabbed from Multiboot information
 void init_fbe(multiboot_info_t * mb_info);
+void init_screens();
+void test_surfaces();
 
 void update_buffer();
 

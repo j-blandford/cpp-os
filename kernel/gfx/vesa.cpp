@@ -2,15 +2,33 @@
 #include <stdint.h>
 
 #include <memory.h>
+#include <tty.h>
 
 #include <cpu/multiboot.h>
 
 #include <gfx/vga.h>
+#include <gfx/surface.h>
 #include <gfx/vesa.h>
 #include <gfx/terminus.h>
+
 unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 uint8_t     *fb_loc;
 uint8_t     *bb_loc; // back-buffer
+
+void init_screens() {
+
+	screen_surfaces.push_back(Surface(Vector2(0,0), Vector2(frame_width,frame_height)));
+	screen_surfaces[SURF_SCREEN].setBackground(RGBA(0x2a2b31));
+	screen_surfaces[SURF_SCREEN].apply();
+
+    //test_surfaces();
+
+	// screen_surfaces.push_back(Surface(Vector2(250,250), Vector2(50,50)));
+	// screen_surfaces[1].setBackground(RGBA(0xFFFFFF));
+	// screen_surfaces[1].drawCircle(25, 25, 20, RGBA(0xFF0000));
+	// screen_surfaces[1].apply();
+
+}
 
 void putpx(unsigned int x, unsigned int y, uint32_t color)
 {
@@ -85,7 +103,18 @@ void init_fbe(multiboot_info_t * mb_info) {
     bb_loc = (uint8_t*)(int)malloc(frame_height*frame_pitch);
 }
 
+void test_surfaces() {
+    for(size_t i = 0; i < screen_surfaces.size(); i++) {
+        terminal_printf("Surface %d -> pointer=%x\n", i, screen_surfaces[i].buff_loc );
 
+        for(size_t row = 0; row < 10; row++) {
+            uint32_t address = row*screen_surfaces[i].s_pitch;
+            terminal_printf("(0,%d) : (%d %d %d)\n", row, screen_surfaces[i].buff_loc[address],
+                screen_surfaces[i].buff_loc[address+1],
+                screen_surfaces[i].buff_loc[address+2] );
+        }
+    }
+}
 
 void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 	int cx,cy;
@@ -95,13 +124,23 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
  
 	for(cy=0;cy<16;cy++){
 		for(cx=0;cx<8;cx++){
-			if(glyph[cy]&mask[7-cx]) 
-                setpx(x+cx,y+cy-12, fgcolor);
+			if(glyph[cy]&mask[7-cx]) {
+                //setpx(x+cx,y+cy-12, fgcolor);
+                screen_surfaces[SURF_SCREEN].setPixel(x+cx, y+cy-12, fgcolor);
+            }
 		}
 	}
+
+    // MOVE THIS SOMEWHERE BETTER 
+    //screen_surfaces[SURF_SCREEN].apply();
 }
 
 void update_buffer() {
+
+    screen_surfaces[SURF_SCREEN].apply();
+
     // Copy back buffer to front buffer in one big chunk
    memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
+
+   
 }

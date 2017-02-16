@@ -7,6 +7,8 @@
 #include <gfx/vga.h>
 #include <gfx/vesa.h>
 
+std::vector<Surface> screen_surfaces = std::vector<Surface>();
+
 void Surface::setPixel(uint32_t x, uint32_t y, RGBA color) {
     if(x>=this->dim.x || y>=this->dim.y)
         return;

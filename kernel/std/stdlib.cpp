@@ -74,30 +74,41 @@ char *ltoa(unsigned long long N, char *str, int base)
       return str;
 }
 
-char* itoa (int value, char* result, int base) {
+int itoa(int value, char *sp, int radix) {
+    char tmp[16];// be careful with the length of the buffer
+    char *tp = tmp;
+    int i;
+    unsigned v;
 
-		// check that the base if valid
-		if (base < 2 || base > 36) { *result = '\0'; return result; }
+    int sign = (radix == 10 && value < 0);    
+    if (sign)
+        v = -value;
+    else
+        v = (unsigned)value;
 
-		char* ptr = result, *ptr1 = result, tmp_char;
-		int tmp_value;
+    while (v || tp == tmp)
+    {
+        i = v % radix;
+        v /= radix;
+        if (i < 10)
+          *tp++ = i+'0';
+        else
+          *tp++ = i + 'a' - 10;
+    }
 
-		do {
-			tmp_value = value;
-			value /= base;
-			*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
-		} while ( value );
+    int len = tp - tmp;
 
-		// Apply negative sign
-		if (tmp_value < 0) *ptr++ = '-';
-		*ptr-- = '\0';
-		while(ptr1 < ptr) {
-			tmp_char = *ptr;
-			*ptr--= *ptr1;
-			*ptr1++ = tmp_char;
-		}
-		return result;
+    if (sign) 
+    {
+        *sp++ = '-';
+        len++;
+    }
 
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+	*sp = '\0';
+    return len;
 }
 
 int putchar(int ic) {
@@ -146,7 +157,7 @@ int printf(const char* format, ...) {
 
 		if (*format == 'c') {
 			format++;
-			char c = (char) va_arg(parameters, int /* char promotes to int */);
+			char c = (char) va_arg(parameters, int);
 			if (!maxrem) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
@@ -170,7 +181,7 @@ int printf(const char* format, ...) {
 		} else if (*format == 'd' || *format == 'i') {
 			format++;
 
-			char buffer[8];
+			char buffer[16];
 			itoa((int) va_arg(parameters, int), buffer, 10);
 
 			char *c = (char*)buffer;
@@ -268,8 +279,8 @@ int sprintf(char* buffer, const char* format, ...) {
 		else if (*format == 'd' || *format == 'i') {
 			format++;
 
-			char fmt_buffer[8];
-			itoa((int) va_arg(parameters, int), fmt_buffer, 10);
+			char fmt_buffer[16] = {0};
+			itoa(va_arg(parameters, int), fmt_buffer, 10);
 
 			size_t amount = 0;
 			while (fmt_buffer[amount] != '\0') {
@@ -297,5 +308,100 @@ int sprintf(char* buffer, const char* format, ...) {
 	}
 
 	va_end(parameters);
+	return written;
+}
+
+
+int vsprintf(char* buffer, const char* format, va_list parameters) {
+	// set the buffer to zero before any writing
+	int i = 0;
+	while(buffer[i] != 0) { buffer[i] = 0; i++; }
+
+	int written = 0;
+
+	while (*format != '\0') {
+		size_t maxrem = INT_MAX - written;
+
+		buffer[written] = format[0];
+
+		if (format[0] != '%' || format[1] == '%') {
+			if (format[0] == '%')
+				format++;
+			size_t amount = 1;
+			while (format[amount] && format[amount] != '%') {
+				buffer[written+amount] = format[amount];
+				amount++;
+			}
+			if (maxrem < amount) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print((char*)format, amount))
+				return -1;
+			format += amount;
+			written += amount;
+			continue;
+		}
+
+		char* format_begun_at = (char*)(format++);
+
+		if (*format == 'c') {
+			format++;
+			char c = (char) va_arg(parameters, int);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+
+			written++;
+		} 
+		else if (*format == 'x') {
+			format++;
+
+			char fmt_buffer[16] = {0};
+
+			ltoa(va_arg(parameters, unsigned long long), fmt_buffer, 16);
+
+			buffer[written] = '0';
+			buffer[written+1] = 'x';
+
+			size_t amount = 0;
+			while (fmt_buffer[amount] != '\0') {
+				buffer[written+amount+2] = fmt_buffer[amount];
+				amount++;
+			}
+
+			written+=amount+2;
+		} 
+		else if (*format == 'd' || *format == 'i') {
+			format++;
+
+			char fmt_buffer[16] = {0};
+			itoa(va_arg(parameters, int), fmt_buffer, 10);
+
+			size_t amount = 0;
+			while (fmt_buffer[amount] != '\0') {
+				buffer[written+amount] = fmt_buffer[amount];
+				amount++;
+			}
+
+			written+=amount;
+			
+		} 
+		else if (*format == 's') {
+			format++;
+			char* str = va_arg(parameters, char*);
+			size_t len = strlen(str);
+
+			written += len;
+		} 
+		else {
+			format = format_begun_at;
+			size_t len = strlen((char*)format);
+
+			written += len;
+			format += len;
+		}
+	}
 	return written;
 }

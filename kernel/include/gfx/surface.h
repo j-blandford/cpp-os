@@ -8,6 +8,7 @@
 #include <gfx/vga.h>
 #include <gfx/vesa.h>
 
+
 // This is my Surface class. It contains a small section of memory which can be blitted onto the back buffer. 
 //       *** backbuffer ****
 //   <--------  frame_width -->
@@ -20,10 +21,11 @@
 //  |-------------------------| V
 
 class Surface {
-    uint8_t * buff_loc;
+    
     int z_index;
 
 public:
+    uint8_t * buff_loc;
     uint32_t s_pitch;
     Vector2 pos;
     Vector2 dim;
@@ -54,3 +56,5 @@ public:
     void setBackground(RGBA bg_color);
     void drawCircle(uint32_t x, uint32_t y, uint16_t radius, RGBA color);
 };
+
+extern std::vector<Surface> screen_surfaces;

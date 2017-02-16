@@ -15,41 +15,18 @@
 #include <devices/keyboard.h>
 
 
-void init_screens() {
-	std::vector<Surface> screen_surfaces;
-
-	screen_surfaces.push_back(Surface(Vector2(0,0), Vector2(frame_width,frame_height)));
-	screen_surfaces[SURF_SCREEN].setBackground(RGBA(0x2a2b31));
-	screen_surfaces[SURF_SCREEN].apply();
-
-	// screen_surfaces.push_back(Surface(Vector2(250,250), Vector2(50,50)));
-	// screen_surfaces[1].setBackground(RGBA(0xFFFFFF));
-	// screen_surfaces[1].drawCircle(25, 25, 20, RGBA(0xFF0000));
-	// screen_surfaces[1].apply();
-
-}
-
-
 extern "C"
 void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp) {
 	interrupts_disable();
+	terminal_initialize(); 
 
 	init_fbe(mb_info);
 	init_screens();
 
-	terminal_initialize(); 
+	terminal_printf("total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
+	terminal_printf("vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);
 
-	char str_mem_buff[50] = {0};
-	sprintf(str_mem_buff, "total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
-	terminal_writestring((char*)str_mem_buff);
-
-	// char str_mb_buff[50] = {0};
-	// sprintf(str_mb_buff, "memory ptr:  %x \n",mb_info->mem_lower);
-	// terminal_writestring((char*)str_mb_buff);
-
-	char str_bb_buff[50] = {0};
-	sprintf(str_bb_buff, "vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);
-	terminal_writestring((char*)str_bb_buff);
+	test_surfaces();
 
 	update_buffer();
 
@@ -68,19 +45,6 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 		update_buffer();
 
 		getsn(&buffer[0], 1024);
-
-		// if (strncmp(buffer, "clear", 5) == 0) {
-		// 	terminal_clear();
-		// } 
-		// else if (strncmp(buffer, "help", 4) == 0) {
-		// 	string help = "List of commands\n"
-		// 		"help:        prints a list of commands\n"
-		// 		"clear:       clears the screen\n";
-
-		// 	terminal_writestring((char*)help);
-		// }
-		// if (strncmp(buffer, "ls", 5) == 0) {
-		// } 
 
 	}
 }

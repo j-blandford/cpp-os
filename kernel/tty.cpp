@@ -140,6 +140,16 @@ void terminal_writestring(char* data, RGBA color) {
 	}
 }
 
+void terminal_printf(const char* fmt, ...) {
+	va_list parameters;
+	char temp_buffer[50] = {0};
+
+	va_start(parameters, fmt);
+	vsprintf(temp_buffer, fmt, parameters);
+	terminal_writestring((char*)temp_buffer);
+	va_end(parameters);
+}
+
 size_t tty_get_cursor_x() {
 	return terminal_column;
 }
@@ -154,7 +164,7 @@ void update_cursor(int row, int col)
 {
 	unsigned short position=(row*80) + col;
 
-	terminal_putentryat('|', RGBA(0x000000), cursor_pos.x, cursor_pos.y); // remove old caret
+	terminal_putentryat('|', RGBA(0x2a2b31), cursor_pos.x, cursor_pos.y); // remove old caret
 
 	terminal_putentryat('|', RGBA(0x00FF00), col+1, row);
 
