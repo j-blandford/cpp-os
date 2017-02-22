@@ -7,7 +7,7 @@ MB_VIDEO_MODE equ 1<<2                      ; request a video mode
 MB_HEADER_FLAGS equ (MB_PAGE_ALIGN | MB_MEMORY_INFO | MB_VIDEO_MODE)
 MB_CHECKSUM equ -(MB_HEADER_MAGIC + MB_HEADER_FLAGS)
 
-STACK_SIZE equ 32768                        ; 32kb (gotta think big)
+STACK_SIZE equ 32768
 
 bits 32
 

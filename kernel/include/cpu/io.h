@@ -17,3 +17,10 @@ uint32_t inportl (uint16_t port);
 void outportl (uint16_t port, uint32_t data);
 
 __attribute__((noreturn)) void halt();
+
+ //outputs a character to the debug console
+ #define BochsConsolePrintChar(c) outportb(0xe9, c)
+ //stops simulation and breaks into the debug console
+ #define BochsBreak() outportl(0x8A00,0x8A00); outportl(0x8A00,0x08AE0);
+ 
+void BochsConsolePrint(char *s);

@@ -2,6 +2,8 @@
 #include <std.h>
 #include <stdarg.h>
 
+#include <std/string.h>
+
 /* Return the `ldiv_t' representation of NUMER over DENOM.  */
 ldiv_t ldiv (unsigned long int numer, unsigned long int denom)
 {
@@ -127,91 +129,6 @@ static bool print(char* data, size_t length) {
 	return true;
 }
 
-int printf(const char* format, ...) {
-	va_list parameters;
-	va_start(parameters, format);
-
-	int written = 0;
-
-	while (*format != '\0') {
-		size_t maxrem = INT_MAX - written;
-
-		if (format[0] != '%' || format[1] == '%') {
-			if (format[0] == '%')
-				format++;
-			size_t amount = 1;
-			while (format[amount] && format[amount] != '%')
-				amount++;
-			if (maxrem < amount) {
-				// TODO: Set errno to EOVERFLOW.
-				return -1;
-			}
-			if (!print((char*)format, amount))
-				return -1;
-			format += amount;
-			written += amount;
-			continue;
-		}
-
-		char* format_begun_at = (char*)(format++);
-
-		if (*format == 'c') {
-			format++;
-			char c = (char) va_arg(parameters, int);
-			if (!maxrem) {
-				// TODO: Set errno to EOVERFLOW.
-				return -1;
-			}
-			if (!print(&c, sizeof(c)))
-				return -1;
-			written++;
-		} else if (*format == 'x') {
-			format++;
-
-			char buffer[8];
-
-			ltoa(va_arg(parameters, long), buffer, 16);
-
-			char * hex = "0x";
-			strcat(hex, buffer);
-
-			if (!print(hex, sizeof(hex)))
-				return -1;
-			written++;
-		} else if (*format == 'd' || *format == 'i') {
-			format++;
-
-			char buffer[16];
-			itoa((int) va_arg(parameters, int), buffer, 10);
-
-			char *c = (char*)buffer;
-
-			if (!print((char*)c, sizeof(c)))
-				return -1;
-			written++;
-		} else if (*format == 's') {
-			format++;
-			char* str = va_arg(parameters, char*);
-			size_t len = strlen(str);
-
-			if (!print(str, len))
-				return -1;
-			written += len;
-		} else {
-			format = format_begun_at;
-			size_t len = strlen((char*)format);
-
-			if (!print((char*)format, len))
-				return -1;
-			written += len;
-			format += len;
-		}
-	}
-
-	va_end(parameters);
-	return written;
-}
-
 int sprintf(char* buffer, const char* format, ...) {
 	va_list parameters;
 	va_start(parameters, format);
@@ -262,19 +179,18 @@ int sprintf(char* buffer, const char* format, ...) {
 			format++;
 
 			char fmt_buffer[16] = {0};
+			ltoa(va_arg(parameters, int), fmt_buffer, 16);
 
-			ltoa(va_arg(parameters, unsigned long long), fmt_buffer, 16);
-
-			buffer[written] = '0';
-			buffer[written+1] = 'x';
+			// buffer[written] = '0';
+			// buffer[written+1] = 'x';
 
 			size_t amount = 0;
 			while (fmt_buffer[amount] != '\0') {
-				buffer[written+amount+2] = fmt_buffer[amount];
+				buffer[written+amount] = fmt_buffer[amount];
 				amount++;
 			}
 
-			written+=amount+2;
+			written+=amount;
 		} 
 		else if (*format == 'd' || *format == 'i') {
 			format++;
@@ -289,14 +205,12 @@ int sprintf(char* buffer, const char* format, ...) {
 			}
 
 			written+=amount;
-			
 		} 
 		else if (*format == 's') {
 			format++;
-			char* str = va_arg(parameters, char*);
-			size_t len = strlen(str);
+			string str = va_arg(parameters, string);
 
-			written += len;
+			written += str.size();
 		} 
 		else {
 			format = format_begun_at;
@@ -360,7 +274,7 @@ int vsprintf(char* buffer, const char* format, va_list parameters) {
 
 			char fmt_buffer[16] = {0};
 
-			ltoa(va_arg(parameters, unsigned long long), fmt_buffer, 16);
+			ltoa(va_arg(parameters, int), fmt_buffer, 16);
 
 			buffer[written] = '0';
 			buffer[written+1] = 'x';
@@ -390,10 +304,15 @@ int vsprintf(char* buffer, const char* format, va_list parameters) {
 		} 
 		else if (*format == 's') {
 			format++;
-			char* str = va_arg(parameters, char*);
-			size_t len = strlen(str);
+			char * str = va_arg(parameters, char*);
 
-			written += len;
+			size_t amount = 0;
+			while (str[amount] != '\0') {
+				buffer[written+amount] = str[amount];
+				amount++;
+			}
+
+			written += amount;
 		} 
 		else {
 			format = format_begun_at;

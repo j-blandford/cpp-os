@@ -14,6 +14,7 @@
 
 #include <devices/keyboard.h>
 
+#include <drivers/pci.h>
 
 extern "C"
 void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp) {
@@ -23,10 +24,12 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	init_fbe(mb_info);
 	init_screens();
 
+	init_pci();
+
 	terminal_printf("total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
 	terminal_printf("vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);
 
-	test_surfaces();
+	//test_surfaces();
 
 	update_buffer();
 

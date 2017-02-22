@@ -43,17 +43,15 @@ void gdt_install()
 	gp.limit = (sizeof(struct gdt_info) * 3) - 1;
 	gp.base = (uint32_t) &gdt;
 
-    // flat 0-> 4GB memory mapping for ease. Maybe in the future replace this with the physical mappings (using kmain and a GRUB pointer)
+    // flat 0-> 4GB memory mapping for ease. hardware segmentation is obsolete now
 	gdt_set_gate(0, 0, 0, 0, 0); // first gate is ALWAYS null
-	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xC0); // 0x9A corresponds to CODE memory segments
-	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xC0); // 0x92 corresponds to DATA memory segments, they overlap! pls fix :)
-	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xF8, 0xC0); // User Code segment
-  	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xC0); // User Data segment
+	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xC0); // 0x9A corresponds to ring 0 CODE memory segments
+	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xC0); // 0x92 corresponds to  ring 0 DATA memory segments
+	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xF8, 0xC0); // User Code (r3) segment maybe these 2 shouldn't overlap with the ring 0...
+  	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xC0); // User Data (r3) segment
   //	gdt_set_gate(5, (uint32_t)&tss, sizeof(struct gdt_tss_entry), 0x89, 0x40); // TSS segment
 
     // to be included: TSS GDT gates.... watch this space
 
 	gdt_flush(&gp); // flush the changes to the ASM function "gdt_flush" which calls the instruction LGDT and then performs a long jump to install the GDT
-
-    terminal_writelog("GDT Installed");
 }

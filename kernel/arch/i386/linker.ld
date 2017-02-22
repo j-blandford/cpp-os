@@ -35,7 +35,7 @@ SECTIONS
       }
 
       . = 64M;
-      .kheap BLOCK(128M) : ALIGN(4096)
+      .kheap BLOCK(32M) : ALIGN(4096)
       {
         kernel_heap_start = .;
         *(.kheap)

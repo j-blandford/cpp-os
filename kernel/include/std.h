@@ -6,8 +6,8 @@
 
 #include <memory.h>
 
-#include <std/string.h>
-#include <std/vector.h>
+// #include <std/string.h>
+// #include <std/vector.h>
 
 // Structs for stdlib
 typedef struct {
@@ -33,7 +33,7 @@ void strncpy( char * ptr_dest, char * ptr_src, int n );
 
 int putchar(int);
 
-int printf(const char* __restrict, ...);
+//int printf(const char* __restrict, ...);
 int sprintf(char* buffer, const char* fmt, ...);
 int vsprintf(char* buffer, const char* format, va_list parameters);
 

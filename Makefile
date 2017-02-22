@@ -4,11 +4,14 @@ ARCH = i386
 
 # Emulator flags and targets
 QEMU = qemu-system-i386
-QEMU_FLAGS = -s
-QEMU_FLAGS += -m 512
-QEMU_FLAGS += -serial stdio
-QEMU_FLAGS += -cdrom myos.iso
-QEMU_FLAGS += -vga cirrus
+QEMU_FLAGS = -s					# enable remote debugging
+QEMU_FLAGS += -cdrom myos.iso	# the kernel image
+QEMU_FLAGS += -drive file=disk.img,format=raw		# our basic dummy HDD image
+QEMU_FLAGS += -boot d			# boot from CDROM
+QEMU_FLAGS += -m 512			# 512mb should be enough
+QEMU_FLAGS += -monitor stdio		# output to the current terminal
+QEMU_FLAGS += -vga cirrus		
+
 
 QEMU_VIDEO = vid=qemu,,1280,,720
 
@@ -52,14 +55,16 @@ build-isodir:
 	cp sysroot/boot/grub/grub.cfg isodir/boot/grub/grub.cfg
 
 myos.iso: build-isodir
-	grub-mkrescue -o myos.iso isodir
+	grub-mkrescue /usr/lib/grub/i386-pc -o myos.iso isodir
 
 run-iso: myos.iso
 	${QEMU} ${QEMU_FLAGS} 
+#'	
 #-append "${QEMU_VIDEO}"
 
 run: install myos.iso
 	${QEMU} ${QEMU_FLAGS} 
+#	${QEMU} ${QEMU_FLAGS} 
 
 clean:
 	@-rm -f kernel/*.o
@@ -93,7 +98,7 @@ clean:
 # CFLAGS += -D_KERNEL_
 # ASMFLAGS = --32
 
-CPPFLAGS  = -O2 -std=gnu++11 -nostdinc++
+CPPFLAGS  = -O2 -g -std=gnu++11 -nostdinc++
 CPPFLAGS += -finline-functions -ffreestanding -nostdlib
 CPPFLAGS += -Wall -Wextra -fno-exceptions -Warray-bounds
 CPPFLAGS += -Wno-write-strings

@@ -37,3 +37,10 @@ __attribute__((noreturn)) inline void halt() {
     __asm__ __volatile__ ("hlt");
   }
 }
+
+void BochsConsolePrint(char *s){
+   do {
+        outportb(0xe9 ,*s);
+        s++;
+   } while( *s != 0);
+}
