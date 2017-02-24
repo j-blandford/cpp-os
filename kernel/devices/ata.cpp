@@ -7,7 +7,7 @@
 
 #include <devices/ata.h>
 
-const int device_offsets[2][2] = {
+const uint16_t device_offsets[2][2] = {
     { ATA_0_MASTER, ATA_0_SLAVE },
     { ATA_1_MASTER, ATA_1_SLAVE }
 };
@@ -34,7 +34,19 @@ std::vector<ATA_Device> ATA::findATA() {
     std::vector<ATA_Device> found_devices = std::vector<ATA_Device>();
     for(int bus = 0; bus < 2; bus++) {
         for(int drive = 0; drive < 2; drive++) {
-            
+            uint16_t base_offset = device_offsets[bus][drive];
+
+            uint8_t connected = inportb(base_offset + ATA_STATUS);
+            if(connected == 0xFF) {
+                terminal_printf("[ATA] Device (%d,%d) not found\n", bus, drive);
+                continue;
+            } 
+            else {
+                terminal_printf("[ATA] FOUND DEVICE AT (%d,%d)!\n", bus, drive);
+            }
+
+
+
         }
     }
     return found_devices;
