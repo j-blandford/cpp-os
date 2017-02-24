@@ -13,6 +13,7 @@
 #include <gfx/surface.h>
 
 #include <devices/keyboard.h>
+#include <devices/ata.h>
 
 #include <drivers/pci.h>
 
@@ -25,6 +26,7 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	init_screens();
 
 	init_pci();
+	init_ata();
 
 	terminal_printf("total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
 	terminal_printf("vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);

@@ -6,11 +6,11 @@
 
 #include <cpu/io.h>
 
-#define PCI_VENDOR_ID            0x00 // 2
-#define PCI_DEVICE_ID            0x02 // 2
-#define PCI_COMMAND              0x04 // 2
-#define PCI_STATUS               0x06 // 2
-#define PCI_REVISION_ID          0x08 // 1
+#define PCI_VENDOR_ID            0x00 // 2 bytes
+#define PCI_DEVICE_ID            0x02 // 2 bytes
+#define PCI_COMMAND              0x04 // 2 bytes
+#define PCI_STATUS               0x06 // 2 bytes
+#define PCI_REVISION_ID          0x08 // 1 byte
 
 #define PCI_ADDRESS_PORT 0xCF8
 #define PCI_DATA_PORT 0xCFC

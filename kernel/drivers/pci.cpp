@@ -39,11 +39,11 @@ uint16_t PCI::getDevice(uint8_t bus, uint8_t slot, uint8_t function) {
 
 
 uint8_t PCI::getClassId(uint8_t bus, uint8_t slot, uint8_t function) {
-    return (uint8_t)(PCI::readConfig_word(bus, slot, function, 10) >> 8); // this word contains 8 bits of CLID, and 8 bits of SUBCLID
+    return (uint8_t)(PCI::readConfig_word(bus, slot, function, 10) >> 8); // this short contains 8 bits of CLID, and 8 bits of SUBCLID
 }
 
 uint8_t PCI::getSubclassId(uint8_t bus, uint8_t slot, uint8_t function) {
-    return (uint8_t)(PCI::readConfig_word(bus, slot, function, 10)); // this word contains 8 bits of CLID, and 8 bits of SUBCLID
+    return (uint8_t)(PCI::readConfig_word(bus, slot, function, 10)); // this short contains 8 bits of CLID, and 8 bits of SUBCLID
 }
 
 // only call this on boot! very resource intensive

@@ -14,8 +14,9 @@ isr_common_stub:
               mov fs, ax
               mov gs, ax
 
-              push esp            ; push a the stack pointer
-              call isr_handler    ; so we can use it as a pointer to a struct in here
+              push esp
+              call isr_handler
+
               ;mov eax, esp        ; return value (uint32_t) is the new stack pointer
               add esp, 4
 
@@ -272,7 +273,7 @@ isr47:        cli
               push byte 47
               jmp isr_common_stub
 
-; This one is special, its our syscall handler :)
+; let us have 0x80 as our syscall
 global isr128
 isr128:       cli
               push byte 0

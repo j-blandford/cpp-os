@@ -16,51 +16,40 @@ extern code, bss, end, kernel_main
 ; put the multiboot header within the first 8kb of the kernel.
 ; this is achieved in the linker script
 section ._multiboot_header
-
 align 4
 _multiboot_header:
-                dd MB_HEADER_MAGIC          ;
-                dd MB_HEADER_FLAGS          ;
-                dd MB_CHECKSUM              ;
+            dd MB_HEADER_MAGIC          ;
+            dd MB_HEADER_FLAGS          ;
+            dd MB_CHECKSUM              ; defined as a simple mathematical function
 
-                dd _multiboot_header        ; header address
-                dd code                     ;
-                dd bss                      ;
-                dd end                      ;
-                dd _boot                    ; entry point
+            dd _multiboot_header        ; header address
+            dd code                     ;
+            dd bss                      ;
+            dd end                      ;
+            dd _boot                    ; entry point
 
-                dd 0                        
-                dd 640                    ; No preferred width
-                dd 480                      ; No preferred height
-                db 24                       ; 32 bpp
+            dd 0
+            dd 640                      ; preferred width
+            dd 480                      ; preffered height
+            db 24                       ; 32 bpp (8r/8g/8b/8a)
                 
 section .text
 global _boot:function _boot.end-_boot
 _boot:
-                  ; 9 tabs (2 spaces)       ; and 13 more to here
-                  cli                       ; first order: disable interrupts
-                  cmp eax, MB_EAX_MAGIC
-                  jne .no_multiboot
+            cli                       ; first order: disable interrupts
 
-                  finit                     ; fpu init
+;                  finit                     ; fpu init (not needed ATM)
+            mov esp, stack            ; setup stack
 
-                  mov esp, stack            ; setup stack
+            push stack                ; pass stack start (param 3)
+            push STACK_SIZE           ; and size to the kernel (param 2)
+            push ebx                  ; and don't forget a pointer to the multiboot header (param 1)
 
-                  push stack                ; pass stack start
-                  push STACK_SIZE           ; and size to the kernel
-                  push ebx                  ; and don't forget a pointer to the multiboot header
+            call kernel_main                ; int kmain (multiboot_t *multiboot_info, uint32_t stack_size, uintptr_t esp);
 
-                  cmp eax, MB_EAX_MAGIC     ; magic is in the air
-
-                  call kernel_main                ; int kmain (multiboot_t *multiboot_info, uint32_t stack_size, uintptr_t esp);
-
-.halt:            cli                       ; if we ever return just go to sleep
-                  hlt
-                  jmp .halt
-
-.no_multiboot:    ; NO (trying to do the least possible but still letting the user know = i'm lazy)
-                  mov dword[0xb8000], 0x4f4e4f4f
-                  jmp .halt
+.halt:      cli
+            hlt
+            jmp .halt
 .end:
 
 %include "kernel/cpu/gdt.s"

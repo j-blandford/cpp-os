@@ -4,3 +4,4 @@ sysroot
 *.out
 *.o
 .vscode/*
+disk\.img
