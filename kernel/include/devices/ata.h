@@ -13,10 +13,10 @@
 #define ATA_SLAVE_DRIVE     1
 
 // ATA IRQs
-#define ATA_IRQ0_M	14 // NEED TO REMAP THESE
-#define ATA_IRQ0_S	15 // ^^^^
-#define ATA_IRQ1_M	11 // ^^^^
-#define ATA_IRQ1_S	9  // ^^^^
+#define ATA_IRQ0_M	32+14 // NEED TO REMAP THESE
+#define ATA_IRQ0_S	32+15 // ^^^^
+#define ATA_IRQ1_M	32+11 // ^^^^
+#define ATA_IRQ1_S	32+9  // ^^^^
 
 // In/output offsets
 #define ATA_0_MASTER	0x1F0
@@ -48,6 +48,9 @@ public:
     // programmed i/o mode (all ATA devices support this)
     static uint16_t * readPIO(int bus, int drive, int size);
     static void writePIO(int bus, int drive, uint16_t * buffer, int size);
+
+    static void resetATA(int bus, int drive);
+    static void wait(int bus, int drive, int mask, int waitForState);
 
     static std::vector<ATA_Device> findATA();
 

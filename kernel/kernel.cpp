@@ -3,6 +3,8 @@
 
 #include <std.h>
 
+#include <arch/i386/timer.h>
+
 #include <tty.h>
 
 #include <cpu/multiboot.h>
@@ -25,6 +27,14 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	init_fbe(mb_info);
 	init_screens();
 
+	gdt_install();
+	idt_install();
+
+	keyboard_install(); // IRQ1
+	
+	PIT::initTimer(); // IRQ0
+	PIT::testTimer();
+
 	init_pci();
 	init_ata();
 
@@ -34,11 +44,6 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	//test_surfaces();
 
 	update_buffer();
-
-	gdt_install();
-	idt_install();
-
-	keyboard_install();
 
 	interrupts_enable();
 
