@@ -18,6 +18,16 @@
 #define ATA_IRQ1_M	32+11 // ^^^^
 #define ATA_IRQ1_S	32+9  // ^^^^
 
+// ATA Flags when sending data
+#define ATA_F_ECC	0x80
+#define ATA_F_SLAVE	0x10        // slave drive
+#define ATA_F_512_SEC	0x20	// 512byte sectors
+#define ATA_F_LBA	0x40        // linear addressing
+
+// ATA Status codes
+#define ATA_STATUS_DRQ	0x08    // request data
+#define ATA_STATUS_BSY	0x80  //busy
+
 // In/output offsets
 #define ATA_0_MASTER	0x1F0
 #define ATA_0_SLAVE	    0x170
@@ -35,7 +45,14 @@
 #define ATA_STATUS	7
 #define ATA_COMMAND	7
 
-#define ATA_CONTROL	0x206
+#define ATA_CTRL	0x206
+#define ATA_CTRL_RST	0x04
+#define ATA_CTRL_DISABLE_INT	0x02
+
+#define ATA_COMMAND_IDLE		0x00
+#define ATA_COMMAND_READ		0x20    /* read data */
+#define ATA_COMMAND_WRITE		0x30    /* write data */
+#define ATA_COMMAND_IDENTIFY		0xec
 
 class ATA_Device {
 public:
@@ -49,8 +66,10 @@ public:
     static uint16_t * readPIO(int bus, int drive, int size);
     static void writePIO(int bus, int drive, uint16_t * buffer, int size);
 
+    static bool initializeDevice(int bus, int drive);
     static void resetATA(int bus, int drive);
-    static void wait(int bus, int drive, int mask, int waitForState);
+
+    static bool wait(int bus, int drive, int mask, int waitForState);
 
     static std::vector<ATA_Device> findATA();
 

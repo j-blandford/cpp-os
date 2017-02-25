@@ -31,9 +31,9 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	idt_install();
 
 	keyboard_install(); // IRQ1
-	
+
 	PIT::initTimer(); // IRQ0
-	PIT::testTimer();
+//	PIT::testTimer();
 
 	init_pci();
 	init_ata();

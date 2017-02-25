@@ -168,11 +168,7 @@ int sprintf(char* buffer, const char* format, ...) {
 		if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(parameters, int);
-			if (!maxrem) {
-				// TODO: Set errno to EOVERFLOW.
-				return -1;
-			}
-
+			buffer[written] = c;
 			written++;
 		} 
 		else if (*format == 'x') {
@@ -262,11 +258,7 @@ int vsprintf(char* buffer, const char* format, va_list parameters) {
 		if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(parameters, int);
-			if (!maxrem) {
-				// TODO: Set errno to EOVERFLOW.
-				return -1;
-			}
-
+			buffer[written] = c;
 			written++;
 		} 
 		else if (*format == 'x') {
