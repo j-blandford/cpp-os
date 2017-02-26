@@ -20,7 +20,7 @@ uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
 static int X_FONTWIDTH = 8;
-static int Y_FONTWIDTH = 12; 
+static int Y_FONTWIDTH = 15; 
 static vec2 cursor_pos = { 0, 0 };
 
 void terminal_initialize(void) {

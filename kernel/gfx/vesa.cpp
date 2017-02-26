@@ -15,6 +15,8 @@ unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 uint8_t     *fb_loc;
 uint8_t     *bb_loc; // back-buffer
 
+bool         *dirty_lines; // our "dirty" buffer
+
 void init_screens() {
 
 	screen_surfaces.push_back(Surface(Vector2(0,0), Vector2(frame_width,frame_height)));
@@ -101,6 +103,9 @@ void init_fbe(multiboot_info_t * mb_info) {
     frame_pitch = mb_info->framebuffer_pitch;
 
     bb_loc = (uint8_t*)(int)malloc(frame_height*frame_pitch);
+
+    dirty_lines = (bool*)malloc(sizeof(bool)*frame_height);
+    memset(dirty_lines, false, sizeof(bool)*frame_height);
 }
 
 void test_surfaces() {
@@ -120,13 +125,19 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 	int cx,cy;
 	int mask[8]={1,2,4,8,16,32,64,128};
 
+    uint32_t x_coord;
+    uint32_t y_coord;
+
 	uint8_t * glyph = font_terminus[c];
  
 	for(cy=0;cy<16;cy++){
 		for(cx=0;cx<8;cx++){
 			if(glyph[cy]&mask[7-cx]) {
-                //setpx(x+cx,y+cy-12, fgcolor);
-                screen_surfaces[SURF_SCREEN].setPixel(x+cx, y+cy-12, fgcolor);
+                x_coord = x+cx;
+                y_coord = y+cy-12;
+
+                screen_surfaces[SURF_SCREEN].setPixel(x_coord, y_coord, fgcolor);
+                *(dirty_lines+sizeof(bool)*(y_coord)) = true; // update the dirty buffer for this y-value
             }
 		}
 	}
@@ -135,12 +146,19 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
     //screen_surfaces[SURF_SCREEN].apply();
 }
 
-void update_buffer() {
+void update_buffer(bool fullRefresh) {
 
     screen_surfaces[SURF_SCREEN].apply();
 
-    // Copy back buffer to front buffer in one big chunk
-   memcpy((uint8_t *)fb_loc, (uint8_t *)bb_loc, frame_height*frame_pitch);
+    // Copy back buffer to front buffer where the "dirty" buffer is 1
+    // we are currently marking one line dirty and updating the line
+    // this could be improved by creating little pixels of ~25x25 for the dirty buffer
+    for(int y = 0; y < frame_height; y++ ) {
+        if(fullRefresh || dirty_lines[y]) {
+            memcpy(&(fb_loc[y*frame_pitch]), bb_loc + y*frame_pitch, frame_pitch);
+        }
+    }
 
-   
+    // reset the dirty buffer
+    memset(dirty_lines, false, sizeof(bool)*frame_height);
 }

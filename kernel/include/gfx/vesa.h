@@ -85,7 +85,7 @@ void init_fbe(multiboot_info_t * mb_info);
 void init_screens();
 void test_surfaces();
 
-void update_buffer();
+void update_buffer(bool fullRefresh = true);
 
 void putpx(unsigned int x, unsigned int y, RGBA color);
 void setpx(unsigned int x, unsigned int y, RGBA col);
@@ -98,6 +98,7 @@ void       fill_circle(const uint32_t x, const uint32_t y,
 extern unsigned int frame_width, frame_height, frame_depth, frame_pitch;
 extern uint8_t     *fb_loc;
 extern uint8_t     *bb_loc; // back-buffer
+extern bool        *dirty_lines;
 
 // Font drawing and display functions
 void drawchar_transparent( unsigned char c, int x, int y, RGBA fgcolor);

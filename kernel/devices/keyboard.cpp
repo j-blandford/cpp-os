@@ -128,7 +128,7 @@ static void keyboard_irq1(struct registers * registers) {
 
         if((int)c != 0) { 
             terminal_putchar(c, RGBA(0xFFFFFF));
-            update_buffer();
+            update_buffer(false);
         }
     }
     return;
