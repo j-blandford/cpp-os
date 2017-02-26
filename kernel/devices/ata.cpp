@@ -10,6 +10,7 @@
 #include <cpu/io.h>
 #include <cpu/idt.h> 
 
+#include <devices/filesystems.h>
 #include <devices/ata.h>
 
 const uint16_t device_offsets[2][2] = {
@@ -94,8 +95,53 @@ bool ATA::initializeDevice(int bus, int drive) {
 
     uint16_t *buffer = ATA::readPIO(bus, drive, 512);
 
-    // terminal_writestring(">>> LE FINIooooo");
-    // update_buffer();
+    return true;
+}
+
+bool ATA::prepare(int bus, int drive, int command, int num_blocks, int offset) {
+    uint16_t base_offset = device_offsets[bus][drive];
+
+    int flags = ATA_F_ECC | ATA_F_LBA | ATA_F_512_SEC;
+	if(drive == 1) flags |= ATA_F_SLAVE;
+
+    flags |= (offset >> 24) & 0xFF;
+
+    // send command ATA_COMMAND_IDENTIFY to the device to grab some of the information
+    ATA::wait(bus, drive, ATA_STATUS_BSY, 0);
+
+	outportb(base_offset + ATA_CTRL, 0);
+	outportb(base_offset + ATA_COUNT, num_blocks);
+	outportb(base_offset + ATA_SECTOR, offset & 0xFF);
+	outportb(base_offset + ATA_CYL_LO, (offset >> 8) & 0xFF);
+	outportb(base_offset + ATA_CYL_HI, (offset >> 16) & 0xFF);
+	outportb(base_offset + ATA_FDH, flags);
+	outportb(base_offset + ATA_COMMAND, command);
+
+    return true;  
+}
+
+bool ATA::read(int bus, int drive, uint8_t* buffer, int num_blocks, int offset) {
+    
+    uint16_t buffer_byte[num_blocks * ATA_BLOCKSIZE] = {0};
+
+    for(size_t block = 0; block < num_blocks; block++) {
+
+        ATA::wait(bus, drive, ATA_STATUS_DRQ, ATA_STATUS_DRQ);
+
+        for(int i = 0; i < ATA_BLOCKSIZE; i++) {
+            buffer_byte[i+block*ATA_BLOCKSIZE] = inports(device_offsets[bus][drive] + ATA_DATA);
+        }
+
+        for(int i = 0; i < ATA_BLOCKSIZE; i++) {
+            // uint16_t is actually TWO char's long!
+            //    terminal_printf("%x ", (int)(buffer_byte[i] & 0xFF));
+            //   terminal_printf("%x ", (int)((buffer_byte[i] >> 8) & 0xFF));
+
+            buffer[i*2 + block*ATA_BLOCKSIZE] = (int)(buffer_byte[i] & 0xFF);
+            buffer[i*2+1 + block*ATA_BLOCKSIZE] = (int)((buffer_byte[i] >> 8) & 0xFF);
+        }
+
+    }
 
     return true;
 }
@@ -109,7 +155,7 @@ std::vector<ATA_Device> ATA::findATA() {
 
             uint8_t connected = inportb(base_offset + ATA_STATUS);
             if(connected == 0xFF) {
-        //        terminal_printf("[ATA] Device (%d,%d) not found\n", bus, drive);
+                // this device isn't connected/configured
                 continue;
             } 
 
@@ -119,6 +165,16 @@ std::vector<ATA_Device> ATA::findATA() {
             ATA::resetATA(bus, drive);
 
             ATA::initializeDevice(bus, drive);
+
+            if(bus == 0 && drive == 0) {
+                Filesystems::FAT16 device = Filesystems::FAT16(base_offset, bus, drive);
+
+                if(device.parseHeader()) {
+                    terminal_multistring(">>>> Success! ", RGBA(0x00FF00), "Verified FAT16 drive\n", RGBA(0xFFFFFF));
+                } else {
+                    terminal_multistring(">>>> Error! ", RGBA(0xFF0000), " Drive is corrupted\n", RGBA(0xFFFFFF));
+                }
+            }
           
         }
     }

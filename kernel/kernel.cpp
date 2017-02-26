@@ -52,7 +52,7 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	while (true) {
 		terminal_writestring("kernel", RGBA(0xDDDDDD));
 		terminal_writestring("> ", RGBA(0xFFFFFF));
-		update_buffer();
+		update_buffer(false);
 
 		getsn(&buffer[0], 1024);
 

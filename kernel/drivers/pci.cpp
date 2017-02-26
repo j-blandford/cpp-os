@@ -91,9 +91,6 @@ void init_pci() {
     PCI::Initialise();
 
     //pci_devices.push_back(PCI_Device());
-
-    update_buffer();
-
     // std::vector<int> arr = std::vector<int>();
     // terminal_writestring("got here 1");
     // arr.push_back(1);

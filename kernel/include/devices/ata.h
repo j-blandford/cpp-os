@@ -67,8 +67,11 @@ public:
     static void writePIO(int bus, int drive, uint16_t * buffer, int size);
 
     static bool initializeDevice(int bus, int drive);
+
     static void resetATA(int bus, int drive);
 
+    static bool prepare(int bus, int drive, int command, int num_blocks, int offset); // prepares the device for a command's data packet
+    static bool read(int bus, int drive, uint8_t* buffer, int num_blocks, int offset);
     static bool wait(int bus, int drive, int mask, int waitForState);
 
     static std::vector<ATA_Device> findATA();

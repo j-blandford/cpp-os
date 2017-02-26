@@ -15,9 +15,11 @@ void Surface::setPixel(uint32_t x, uint32_t y, RGBA color) {
 
     unsigned int where = x*(frame_depth/8) + y*this->s_pitch;
     
-    this->buff_loc[where + 0] = color.b;
+    this->buff_loc[where] = color.b;
     this->buff_loc[where + 1] = color.g;
     this->buff_loc[where + 2] = color.r;
+
+    this->dirty_buffer[y] = true;
 }
 
 void Surface::drawCircle(uint32_t x, uint32_t y, uint16_t radius, RGBA color) {
@@ -52,7 +54,7 @@ void Surface::drawCircle(uint32_t x, uint32_t y, uint16_t radius, RGBA color) {
     }
 }
 
-void Surface::apply() {
+void Surface::apply(bool fullRefresh) {
     // Apply the surface to the back buffer.
     // ------------------------------------------------------------------**
     //     PLEASE NOTE: this function doesn't actually display the Surface! 
@@ -60,18 +62,19 @@ void Surface::apply() {
     // ------------------------------------------------------------------**
 
     for(int y = 0; y < this->dim.y; y++) {
-        // no SSE functions are currently implemented, so we have to copy it line by line
-        int where = this->pos.x*(frame_depth/8) + (y+this->pos.y)*(frame_pitch); //
+        if(fullRefresh || this->dirty_buffer[y]) {
+            // no SSE functions are currently implemented, so we have to copy it line by line
+            int where = this->pos.x*(frame_depth/8) + (y+this->pos.y)*(frame_pitch); //
 
-       // uint8_t* dest = bb_loc;
-        memcpy(&bb_loc[where], &this->buff_loc[y*this->s_pitch], this->s_pitch);
+            memcpy(&bb_loc[where], &this->buff_loc[y*this->s_pitch], this->s_pitch);
+        }
     }
 }
 
 void Surface::bringToFront() {
     z_index = 10;
 }
-void Surface::setZindex(int z_index) {
+void Surface::setZindex(uint8_t z_index) {
     (*this).z_index = z_index;
 }
 

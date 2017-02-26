@@ -140,6 +140,11 @@ void terminal_writestring(char* data, RGBA color) {
 	}
 }
 
+void terminal_multistring(char* data1, RGBA color1, char* data2, RGBA color2) {
+	terminal_writestring(data1, color1);
+	terminal_writestring(data2, color2);
+}
+
 void terminal_printf(const char* fmt, ...) {
 	va_list parameters;
 	char temp_buffer[50] = {0};

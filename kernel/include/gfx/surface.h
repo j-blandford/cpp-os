@@ -22,10 +22,12 @@
 
 class Surface {
     
-    int z_index;
+    uint8_t z_index;
 
 public:
     uint8_t * buff_loc;
+    bool * dirty_buffer; // per window dirty buffer for speedy updates!
+
     uint32_t s_pitch;
     Vector2 pos;
     Vector2 dim;
@@ -41,16 +43,18 @@ public:
         (*this).z_index = 1; // 1 is just above the lowest terminal buffer
 
         float pitchRatio = (float)frame_pitch / (float)frame_width;
-
         (*this).s_pitch = pitchRatio*dim.x; 
 
         (*this).buff_loc = (uint8_t*)malloc(dim.y*(*this).s_pitch);
+
+        (*this).dirty_buffer = (bool*)malloc(dim.y*sizeof(bool));
+        memset((*this).dirty_buffer,false,dim.y);
     }
 
-    void apply(); // Apply the Surface to the backbuffer
+    void apply(bool fullRefresh = true); // Apply the Surface to the backbuffer
 
     void bringToFront();
-    void setZindex(int z_index);
+    void setZindex(uint8_t z_index);
 
     void setPixel(uint32_t x, uint32_t y, RGBA color); // Set a single pixel
     void setBackground(RGBA bg_color);

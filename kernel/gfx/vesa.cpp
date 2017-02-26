@@ -148,7 +148,7 @@ void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
 
 void update_buffer(bool fullRefresh) {
 
-    screen_surfaces[SURF_SCREEN].apply();
+    screen_surfaces[SURF_SCREEN].apply(false);
 
     // Copy back buffer to front buffer where the "dirty" buffer is 1
     // we are currently marking one line dirty and updating the line
