@@ -26,7 +26,8 @@
 
 // ATA Status codes
 #define ATA_STATUS_DRQ	0x08    // request data
-#define ATA_STATUS_BSY	0x80  //busy
+#define ATA_STATUS_BSY	0x80    //busy
+#define ATA_STATUS_RDY	0x40    // ready for commands
 
 // In/output offsets
 #define ATA_0_MASTER	0x1F0

@@ -111,7 +111,7 @@ void idt_install() {
 
   idt_flush((uint32_t)&idt_p);
 
-  terminal_writelog("IDT installed (interrupts now enabled)");
+  terminal_writelog("IDT installed, registering interrupts...");
 }
 
 isr_t isr_handlers[256];

@@ -28,6 +28,9 @@ uint16_t * ATA::readPIO(int bus, int drive, int size) {
 
     }
 
+    if((int)(buffer_byte[27] >> 8) != 0)
+        terminal_printf("[ATA] Device (%d,%d): ", bus, drive);
+
     for(int i = 27; i < 47; i++) {
         // uint16_t is actually TWO char's long!
         terminal_printf("%c", (int)(buffer_byte[i] >> 8));
@@ -106,8 +109,7 @@ bool ATA::prepare(int bus, int drive, int command, int num_blocks, int offset) {
 
     flags |= (offset >> 24) & 0xFF;
 
-    // send command ATA_COMMAND_IDENTIFY to the device to grab some of the information
-    ATA::wait(bus, drive, ATA_STATUS_BSY, 0);
+    ATA::wait(bus, drive,  ATA_STATUS_BSY | ATA_STATUS_RDY, ATA_STATUS_RDY);
 
 	outportb(base_offset + ATA_CTRL, 0);
 	outportb(base_offset + ATA_COUNT, num_blocks);
@@ -124,6 +126,8 @@ bool ATA::read(int bus, int drive, uint8_t* buffer, int num_blocks, int offset) 
     
     uint16_t buffer_byte[num_blocks * ATA_BLOCKSIZE] = {0};
 
+    ATA::prepare(bus, drive, ATA_COMMAND_READ, num_blocks, offset);
+
     for(size_t block = 0; block < num_blocks; block++) {
 
         ATA::wait(bus, drive, ATA_STATUS_DRQ, ATA_STATUS_DRQ);
@@ -137,7 +141,7 @@ bool ATA::read(int bus, int drive, uint8_t* buffer, int num_blocks, int offset) 
             //    terminal_printf("%x ", (int)(buffer_byte[i] & 0xFF));
             //   terminal_printf("%x ", (int)((buffer_byte[i] >> 8) & 0xFF));
 
-            buffer[i*2 + block*ATA_BLOCKSIZE] = (int)(buffer_byte[i] & 0xFF);
+            buffer[i*2 + block*ATA_BLOCKSIZE] = (int)(buffer_byte[i]) & 0xFF;
             buffer[i*2+1 + block*ATA_BLOCKSIZE] = (int)((buffer_byte[i] >> 8) & 0xFF);
         }
 
@@ -158,9 +162,6 @@ std::vector<ATA_Device> ATA::findATA() {
                 // this device isn't connected/configured
                 continue;
             } 
-
-            terminal_printf("[ATA] Device (%d,%d): ", bus, drive);
-
             // We have found an attached ATA device on this bus, let's grab some info on it :)
             ATA::resetATA(bus, drive);
 
@@ -174,6 +175,8 @@ std::vector<ATA_Device> ATA::findATA() {
                 } else {
                     terminal_multistring(">>>> Error! ", RGBA(0xFF0000), " Drive is corrupted\n", RGBA(0xFFFFFF));
                 }
+
+                device.readDirectoryTable("/");
             }
           
         }
