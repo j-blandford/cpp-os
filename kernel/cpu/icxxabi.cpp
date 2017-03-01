@@ -57,7 +57,7 @@ void __cxa_finalize(void *f)
 		return;
 	};
  
-	for ( ; i >= 0; --i)
+	while (i--)
 	{
 		/*
 		* The ABI states that multiple calls to the __cxa_finalize(destructor_func_ptr) function

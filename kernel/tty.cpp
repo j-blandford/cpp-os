@@ -44,17 +44,17 @@ void terminal_initialize(void) {
 }
 
 void terminal_writelog(char* data) {
-	terminal_writestring("[ ");
-	terminal_writestring("LOG", RGBA(0x00FF00));
-	terminal_writestring(" ] ");
+	terminal_writestring("[");
+	terminal_writestring("OK", RGBA(0x00FF00));
+	terminal_writestring("] ");
 	terminal_writestring(data);
 	terminal_writestring("\n");
 }
 
 void terminal_writeerror(char* data) {
-	terminal_writestring("[ ");
+	terminal_writestring("[");
 	terminal_writestring("ERR", RGBA(0xFF0000));
-	terminal_writestring(" ] ");
+	terminal_writestring("] ");
 	terminal_writestring(data);
 	terminal_writestring("\n");
 }
@@ -74,7 +74,7 @@ void terminal_setcolor(uint8_t color) {
 	terminal_color = color;
 }
 
-void terminal_putentryat(unsigned char c, RGBA color, size_t x, size_t y) {
+void terminal_putentryat(const char c, RGBA color, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
 
 	terminal_buffer[index] = vga_entry(c, VGA_COLOR_WHITE);
@@ -101,16 +101,14 @@ void terminal_clear(void) {
 }
 
 
-void terminal_putchar(char c, RGBA color) {
-	unsigned char uc = c;
-
+void terminal_putchar(const char c, RGBA color) {
 	if(c == '\n') {
     	terminal_column = 0;
    		terminal_row++;
     	return;
     } 
 
-	terminal_putentryat(uc, color, terminal_column, terminal_row);
+	terminal_putentryat(c, color, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
@@ -120,23 +118,23 @@ void terminal_putchar(char c, RGBA color) {
 	update_cursor(terminal_row, terminal_column);
 }
 
-void terminal_writestring(char* data) {
+void terminal_writestring(const char* data) {
 	if(terminal_row == VGA_HEIGHT) {
 		terminal_scrollup();
 	}
 
-	for (char* it = data; *it; ++it) {
-		terminal_putchar((*it), RGBA(0xFFFFFF));
+	for (; *data; ++data) {
+		terminal_putchar((*data), RGBA(0xFFFFFF));
 	}
 }
 
-void terminal_writestring(char* data, RGBA color) {
+void terminal_writestring(const char* data, RGBA color) {
 	if(terminal_row == VGA_HEIGHT) {
 		terminal_scrollup();
 	}
 
-	for (char* it = data; *it; ++it) {
-		terminal_putchar((*it), color);
+	for (; *data; ++data) {
+		terminal_putchar((*data), color);
 	}
 }
 

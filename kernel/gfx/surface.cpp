@@ -26,7 +26,7 @@ void Surface::drawCircle(uint32_t x, uint32_t y, uint16_t radius, RGBA color) {
     unsigned int xm=0;
     int delta=1-2*radius, error=0, ym=radius;
 
-    while(1)
+    while(true)
     {
         this->setPixel(x+xm, y+ym, color);
         this->setPixel(x-xm, y+ym, color);
@@ -61,10 +61,10 @@ void Surface::apply(bool fullRefresh) {
     //              --> You need to call "update_buffer()" to display it
     // ------------------------------------------------------------------**
 
-    for(int y = 0; y < this->dim.y; y++) {
+    for(size_t y = 0; y < this->dim.y; y++) {
         if(fullRefresh || this->dirty_buffer[y]) {
             // no SSE functions are currently implemented, so we have to copy it line by line
-            int where = this->pos.x*(frame_depth/8) + (y+this->pos.y)*(frame_pitch); //
+            size_t where = this->pos.x*(frame_depth/8) + (y+this->pos.y)*(frame_pitch); //
 
             memcpy(&bb_loc[where], &this->buff_loc[y*this->s_pitch], this->s_pitch);
         }
@@ -80,8 +80,8 @@ void Surface::setZindex(uint8_t z_index) {
 
 
 void Surface::setBackground(RGBA bg_color) {
-    for(int x = 0; x < this->dim.x; x++) {
-        for(int y = 0; y < this->dim.y; y++) {
+    for(size_t x = 0; x < this->dim.x; x++) {
+        for(size_t y = 0; y < this->dim.y; y++) {
             this->setPixel(x, y, bg_color);
         }
     }

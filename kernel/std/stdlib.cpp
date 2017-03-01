@@ -28,7 +28,7 @@ ldiv_t ldiv (unsigned long int numer, unsigned long int denom)
      case, to get the right answer, add 1 to QUOT and subtract
      DENOM from REM.  */
 
-    if (numer >= 0 && result.rem < 0)
+    if (numer && result.rem < 0)
     {
         ++result.quot;
         result.rem -= denom;
@@ -51,7 +51,7 @@ char *ltoa(unsigned long long N, char *str, int base)
       tail = &buf[BUFSIZE - 1];           /* last character position      */
       *tail-- = '\0';
 
-      if (10 == base && N < 0L)
+      if (10 == base)
       {
             *head++ = '-';
             uarg    = -N;
@@ -62,12 +62,12 @@ char *ltoa(unsigned long long N, char *str, int base)
       {
             for (i = 1; uarg; ++i)
             {
-                  register ldiv_t r;
+                  register ldiv_t res;
 
-                  r       = ldiv(uarg, base);
-                  *tail-- = (char)(r.rem + ((9L < r.rem) ?
+                  res       = ldiv(uarg, base);
+                  *tail-- = (char)(res.rem + ((9L < res.rem) ?
                                   ('A' - 10L) : '0'));
-                  uarg    = r.quot;
+                  uarg    = res.quot;
             }
       }
       else  *tail-- = '0';
@@ -106,8 +106,9 @@ int itoa(int value, char *sp, int radix) {
         len++;
     }
 
-    while (tp > tmp)
+    while (tp > tmp) {
         *sp++ = *--tp;
+	}
 
 	*sp = '\0';
     return len;

@@ -23,8 +23,8 @@ void terminal_initialize(void);
 void terminal_putchar(char c, RGBA color);
 void terminal_clear(void);
 
-void terminal_writestring(char* data);
-void terminal_writestring(char* data, RGBA color);
+void terminal_writestring(const char* data);
+void terminal_writestring(const char* data, RGBA color);
 
 void terminal_multistring(char* data1, RGBA color1, char* data2, RGBA color2);
 

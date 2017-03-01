@@ -17,25 +17,25 @@ SECTIONS
         *(.rodata)
       }
 
-      . = ALIGN(4096);
+      . = 2M;
 
-      .data BLOCK(4K) : ALIGN(4096)
+      .data : ALIGN(4096)
       {
         data = .;
         *(.data)
       }
 
-      . = ALIGN(4096);
+      . = 32M;
 
-      .bss BLOCK(4K) : ALIGN(4096)
+      .bss : ALIGN(4096)
       {
         bss = .;
         *(COMMON)
         *(.bss)
       }
 
-      . = 64M;
-      .kheap BLOCK(32M) : ALIGN(4096)
+      . = 128M;
+      .kheap : ALIGN(4096)
       {
         kernel_heap_start = .;
         *(.kheap)

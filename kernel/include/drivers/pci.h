@@ -90,6 +90,6 @@ public:
     //static string getDeviceDesc(size_t vendorId, size_t deviceId);
 };
 
-extern std::vector_debug<PCI_Device> pci_devices;
+extern std::vector<PCI_Device> pci_devices;
 
 void init_pci();

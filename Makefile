@@ -58,13 +58,16 @@ myos.iso: build-isodir
 	grub-mkrescue /usr/lib/grub/i386-pc -o myos.iso isodir
 
 run-iso: myos.iso
-	${QEMU} ${QEMU_FLAGS} 
+	bochs
+#	${QEMU} ${QEMU_FLAGS} 
 #'	
 #-append "${QEMU_VIDEO}"
 
 run: install myos.iso
+	bochs
+
+run-qemu: install myos.iso
 	${QEMU} ${QEMU_FLAGS} 
-#	${QEMU} ${QEMU_FLAGS} 
 
 clean:
 	@-rm -f kernel/*.o
@@ -98,10 +101,10 @@ clean:
 # CFLAGS += -D_KERNEL_
 # ASMFLAGS = --32
 
-CPPFLAGS  = -O2 -g -std=gnu++11 -nostdinc++
+CPPFLAGS  = -O2 -g -std=gnu++11 -nostdinc++ -fno-rtti
 CPPFLAGS += -finline-functions -ffreestanding -nostdlib
 CPPFLAGS += -Wall -Wextra -fno-exceptions -Warray-bounds
-CPPFLAGS += -Wno-write-strings
+CPPFLAGS += -Wno-write-strings -Wno-unused-variable -Wno-unused-parameter
 CPPFLAGS += -DKERNEL
 # -fno-rtti
 
@@ -131,19 +134,3 @@ install: clean build-kernel
 	@${SUCCESS} "*---------------------------------*"
 	@${SUCCESS} "*-*-*" "Install Success! :)"
 	@${SUCCESS} "*---------------------------------*"
-
-# if the first command line argument is "print"
-ifeq ($(firstword $(MAKECMDGOALS)),print)
-
-  # take the rest of the arguments as variable names
-  VAR_NAMES := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-
-  # turn them into do-nothing targets
-  $(eval $(RUN_ARGS):dummy;@:)
-
-  # then print them
-  .PHONY: print
-  print:
-		@$(foreach var,$(VAR_NAMES),\
-			echo '$(var) = $($(var))';)
-endif

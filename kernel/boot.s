@@ -38,7 +38,7 @@ global _boot:function _boot.end-_boot
 _boot:
             cli                       ; first order: disable interrupts
 
-;                  finit                     ; fpu init (not needed ATM)
+            finit                     ; fpu init
             mov esp, stack            ; setup stack
 
             push stack                ; pass stack start (param 3)
@@ -55,7 +55,7 @@ _boot:
 %include "kernel/cpu/gdt.s"
 %include "kernel/cpu/idt.s"
 %include "kernel/cpu/interrupts.s"
-; %include "kernel/arch/i686/paging.s"
+%include "kernel/cpu/memory.s"
 
 section .bss
 align 16

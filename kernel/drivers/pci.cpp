@@ -8,7 +8,7 @@
 #include <devices/pci-devices.h> // list of PCI devices
 #include <devices/ide.h>
 
-std::vector_debug<PCI_Device> pci_devices = std::vector_debug<PCI_Device>();
+std::vector<PCI_Device> pci_devices = std::vector<PCI_Device>();
 
 void PCI_Device::setDescriptives(char* baseDesc, char*  subclassDesc) {
     this->baseDesc = baseDesc;
@@ -63,7 +63,7 @@ void PCI::Initialise() {
 
                     PCI_Device device(bus, slot, func);
 
-                    for(int i = 0; i < PCI_DEVTABLE_LEN; i++) {
+                    for(size_t i = 0; i < PCI_DEVTABLE_LEN; i++) {
                         if(PciClassCodeTable[i].BaseClass == classId && 
                            PciClassCodeTable[i].SubClass == subclassId &&
                            PciClassCodeTable[i].ProgIf == 0x00 ) 

@@ -43,14 +43,14 @@ public:
 
 class Vector2 {
 public:
-    int32_t x;
-    int32_t y;
+    uint32_t x;
+    uint32_t y;
 
     Vector2() {
         (*this).x = 0;
         (*this).y = 0;
     }    
-    Vector2(int32_t x, int32_t y ) {
+    Vector2(uint32_t x, uint32_t y ) {
         (*this).x = x;
         (*this).y = y;
     }
@@ -87,8 +87,8 @@ void test_surfaces();
 
 void update_buffer(bool fullRefresh = true);
 
-void putpx(unsigned int x, unsigned int y, RGBA color);
-void setpx(unsigned int x, unsigned int y, RGBA col);
+void putpx(size_t x, size_t y, RGBA color);
+void setpx(size_t x, size_t y, RGBA col);
 
 void       draw_circle(const uint32_t x, const uint32_t y,
                                       uint16_t radius, RGBA color);

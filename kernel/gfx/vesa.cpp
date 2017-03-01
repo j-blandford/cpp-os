@@ -32,7 +32,7 @@ void init_screens() {
 
 }
 
-void putpx(unsigned int x, unsigned int y, uint32_t color)
+void putpx(size_t x, size_t y, uint32_t color)
 {
     RGBA col(color);
 
@@ -45,7 +45,7 @@ void putpx(unsigned int x, unsigned int y, uint32_t color)
     
 }
 
-void setpx(unsigned int x, unsigned int y, RGBA col)
+void setpx(size_t x, size_t y, RGBA col)
 {
     if(x>=frame_width || y>=frame_height)
         return;
@@ -122,7 +122,7 @@ void test_surfaces() {
 }
 
 void drawchar_transparent(unsigned char c, int x, int y, RGBA fgcolor) {
-	int cx,cy;
+	size_t cx,cy;
 	int mask[8]={1,2,4,8,16,32,64,128};
 
     uint32_t x_coord;
@@ -153,7 +153,7 @@ void update_buffer(bool fullRefresh) {
     // Copy back buffer to front buffer where the "dirty" buffer is 1
     // we are currently marking one line dirty and updating the line
     // this could be improved by creating little pixels of ~25x25 for the dirty buffer
-    for(int y = 0; y < frame_height; y++ ) {
+    for(size_t y = 0; y < frame_height; y++ ) {
         if(fullRefresh || dirty_lines[y]) {
             memcpy(&(fb_loc[y*frame_pitch]), bb_loc + y*frame_pitch, frame_pitch);
         }
