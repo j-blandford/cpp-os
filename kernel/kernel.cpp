@@ -10,6 +10,7 @@
 #include <cpu/multiboot.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
+#include <cpu/paging.h>
 
 #include <gfx/vesa.h>
 #include <gfx/surface.h>
@@ -22,6 +23,9 @@
 extern "C"
 void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp) {
 	interrupts_disable();
+
+	paging_install();
+
 	terminal_initialize(); 
 
 	init_fbe(mb_info);

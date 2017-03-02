@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-extern int kernel_heap_start;
+extern int end;
 
 // Memory Functions
 int memcmp(const void*, const void*, size_t);

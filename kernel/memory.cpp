@@ -3,8 +3,8 @@
 
 #include <memory.h>
 
-static void *kheap = &kernel_heap_start;
-static const void *heap_start = &kernel_heap_start;
+static void *kheap = &end;
+static const void *heap_start = &end;
 
 // memory allocation
 void *malloc(size_t size) {
