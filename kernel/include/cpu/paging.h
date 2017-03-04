@@ -15,7 +15,7 @@ typedef struct PageDirectory_t {
     unsigned int g_flag : 1;        // unused
     unsigned int free_bits : 4;     // some expandable bits we can use for something
 
-    unsigned int address : 20;      // the meat of our struct :) address to the page table struct
+    unsigned int table_address : 20;      // the meat of our struct :) address to the page table struct
 }__attribute__((packed)) PageDirectory_t;
 
 // PageTable_t is a 32-bit (4 byte) struct
@@ -31,7 +31,7 @@ typedef struct PageTable_t {
     unsigned int g_flag : 1;        // unused
     unsigned int free_bits : 3;     // some expandable bits we can use for something
 
-    unsigned int address : 20;      // the meat of our struct :)
+    unsigned int physical_address : 20;      // the meat of our struct :)
 }__attribute__((packed)) PageTable_t;
 
 void paging_install();

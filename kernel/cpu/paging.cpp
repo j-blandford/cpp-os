@@ -19,19 +19,17 @@ PageTable_t page_table[1024][1024] __attribute__((aligned(4096)));
 extern "C" void set_paging_bit(); // asm global function
 extern "C" void set_paging_pointer(PageDirectory_t*); // asm global function
 
-// we need "get_phys_addr"
-
 void* get_phys_addr(void* virt_addr) {
     
 }
 
-// one page table array gives us 16MiB of usuable virtual address space
-void setup_single_page(PageTable_t pg_table[1024]) {
+// one page table array gives us 4MiB of usuable virtual address space
+void setup_single_page(int pg_dir_index, PageTable_t pg_table[1024]) {
     for(int i = 0; i < 1024; i++) {
         pg_table[i].present = 1;
         pg_table[i].rw = 1;
         pg_table[i].access_lvl = 0;
-        pg_table[i].address = i;
+        pg_table[i].physical_address = pg_dir_index*0x400 + i;
     } 
 }
 
@@ -61,8 +59,8 @@ void init_paging_dir(PageDirectory_t pg_dir[1024]) {
 }
 
 void init_paging_table(PageDirectory_t pg_dir[1024], PageTable_t pg_table[1024][1024]) {
-    for(int i = 0; i < 128; i++) {
-        setup_single_page(pg_table[i]);
+    for(int i = 0; i < 1024; i++) {
+        setup_single_page(i, pg_table[i]);
     }
 }
 
@@ -75,7 +73,7 @@ void paging_install() {
     // {
     //     page_table[0][(int) fb_loc/4096-i].rw   =1;
     //     page_table[0][(int) fb_loc/4096-i].access_lvl=0;
-    //     page_table[0][(int) fb_loc/4096-i].address =((int)fb_loc/4096)+i;
+    //     page_table[0][(int) fb_loc/4096-i].physical_address =((int)fb_loc/4096)+i;
     //     page_table[0][(int) fb_loc/4096-i].present =1;
     // }
 
@@ -84,16 +82,16 @@ void paging_install() {
         page_directory[i].present    = 1;
         page_directory[i].rw    = 1;
         page_directory[i].access_lvl = 0;
-        page_directory[i].address   = (uint32_t)(page_table[i]) >> 12;
+        page_directory[i].table_address   = (uint32_t)(page_table[i]) >> 12;
     }
 
-    // cr0 bit 31 gets set
+
 
     // // set up cr3 to point to the beginning address of our paging directories
     set_paging_pointer(page_directory);
 
-   set_paging_bit();
-
+    // cr0 bit 31 gets set
+    set_paging_bit();
     
 }
 
