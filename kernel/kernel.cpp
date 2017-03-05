@@ -39,7 +39,7 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	PIT::initTimer(); // IRQ0
 	//PIT::testTimer();
 
-	init_pci();
+//	init_pci();
 	init_ata();
 
  	terminal_printf("total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
@@ -59,6 +59,10 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 		update_buffer(false);
 
 		getsn(&buffer[0], 1024);
-
+		
+		if(strncmp(buffer, "listpci", 7) == 0) {
+			init_pci();
+			update_buffer(false);
+		}
 	}
 }

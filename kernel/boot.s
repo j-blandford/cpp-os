@@ -28,7 +28,7 @@ _multiboot_header:
             dd end                      ;
             dd _boot                    ; entry point
 
-            dd 1
+            dd 0
             dd 1024                      ; preferred width
             dd 768                      ; preffered height
             db 24                       ; 32 bpp (8r/8g/8b/8a)

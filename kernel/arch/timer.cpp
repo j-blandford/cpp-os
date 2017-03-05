@@ -49,3 +49,11 @@ void PIT::testTimer() {
         update_buffer();
     }
 }
+
+void sleep(int ticks) {
+    PIT::sleep(ticks);
+}
+
+void wait(int ticks) {
+    PIT::sleep(ticks);
+}

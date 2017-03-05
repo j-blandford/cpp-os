@@ -4,6 +4,8 @@
 
 namespace Filesystems {
 
+    static std::vector<string> tokenizePath(string path);
+
     // TODO: Create base "FS" interface that can be inherited, providing certain functions which are independent of the drive
     typedef struct fat_header {
         unsigned short sectorSize;     // sector size, usually 512

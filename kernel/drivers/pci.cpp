@@ -74,9 +74,9 @@ void PCI::Initialise() {
                     }
 
                     if(device.baseDesc[0] == '\0') {
-                        terminal_printf("[PCI] %x (%x)  (%d:%d.%d)\n", classId, subclassId, bus, slot, func);
+                    //    terminal_printf("[PCI] %x (%x)  (%d:%d.%d)\n", classId, subclassId, bus, slot, func);
                     } else {
-                        terminal_printf("[PCI] %s (%s) %x (%d:%d.%d)\n", device.baseDesc, device.subDesc, device.address, bus, slot, func);
+                        terminal_printf("[PCI] %s (%s) (%d:%d)\n", device.baseDesc, device.subDesc, bus, slot);
                     }
                 }
             }
@@ -89,6 +89,8 @@ void init_pci() {
 	// pcidriver.Initialise();
 
     PCI::Initialise();
+
+    terminal_writestring("\n");
 
     //pci_devices.push_back(PCI_Device());
     // std::vector<int> arr = std::vector<int>();

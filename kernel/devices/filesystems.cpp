@@ -18,7 +18,7 @@ namespace Filesystems {
     }
 
     bool FAT16::parseHeader() {
-        ATA::read(bus, drive, headerBytes, 1, 0);
+        ATA::read(bus, drive, &headerBytes, 1, 0);
 
         uint8_t header[3] = {0xEB, 0x3C, 0x90}; // FAT16 header bytes
 
@@ -49,14 +49,16 @@ namespace Filesystems {
     }
 
     void FAT16::readDirectoryTable(char* path) {
-        //uint8_t * dir = (uint8_t*)malloc(sizeof(uint8_t)*header_info.sectorSize);
+        //uint8_t * dir = 
 
-        fat_direntry_t* dir_table = new fat_direntry_t[16];
+        //fat_direntry_t* dir_table = new fat_direntry_t[16];
 
         terminal_printf("Browsing directory: %s\n", path);
 
         //ATA::resetATA(bus, drive);
-        ATA::read(bus, drive, dirBytes, 1, 512);
+        ATA::read(bus, drive, &dirBytes, 1, 512);
+
+        terminal_writestring("\n");
 
         //memcpy(dir_table, dirBytes, sizeof(fat_direntry_t)*16);
 

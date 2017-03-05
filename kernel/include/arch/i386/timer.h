@@ -15,3 +15,6 @@ public:
     static void setCount(int hz);
     static void sleep(int ticks);
 };
+
+void sleep(int ticks);
+void wait(int ticks);

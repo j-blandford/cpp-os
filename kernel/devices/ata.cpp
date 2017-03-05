@@ -70,7 +70,7 @@ bool ATA::wait(int bus, int drive, int mask, int waitForState) {
 
         if(time > 10) { return false; }
 
-        PIT::sleep(1);
+        sleep(1);
         time++;
     }
 
@@ -113,7 +113,7 @@ bool ATA::prepare(int bus, int drive, int command, size_t num_blocks, int offset
 
 	outportb(base_offset + ATA_CTRL, 0);
 	outportb(base_offset + ATA_COUNT, num_blocks);
-	outportb(base_offset + ATA_SECTOR, offset & 0xFF);
+	outportb(base_offset + ATA_SECTOR, offset);
 	outportb(base_offset + ATA_CYL_LO, (offset >> 8) & 0xFF);
 	outportb(base_offset + ATA_CYL_HI, (offset >> 16) & 0xFF);
 	outportb(base_offset + ATA_FDH, flags);
@@ -122,9 +122,10 @@ bool ATA::prepare(int bus, int drive, int command, size_t num_blocks, int offset
     return true;  
 }
 
-bool ATA::read(int bus, int drive, uint8_t* buffer, size_t num_blocks, int offset) {
+bool ATA::read(int bus, int drive, uint8_t** buffer, size_t num_blocks, int offset) {
     
-    uint16_t buffer_byte[num_blocks * ATA_BLOCKSIZE] = {0};
+    uint16_t buffer_short[num_blocks * ATA_BLOCKSIZE] = {0};
+    uint8_t buffer_byte[num_blocks * ATA_BLOCKSIZE * 2] = {0};
 
     ATA::prepare(bus, drive, ATA_COMMAND_READ, num_blocks, offset);
 
@@ -132,28 +133,28 @@ bool ATA::read(int bus, int drive, uint8_t* buffer, size_t num_blocks, int offse
 
         ATA::wait(bus, drive, ATA_STATUS_DRQ, ATA_STATUS_DRQ);
 
-        for(int i = 0; i < ATA_BLOCKSIZE; i++) {
-            uint16_t readValue = inports(device_offsets[bus][drive] + ATA_DATA);
-            buffer_byte[i+block*ATA_BLOCKSIZE] = readValue;
-
-            buffer[i*2 + block*ATA_BLOCKSIZE] = readValue & 0xFF;
-            buffer[i*2+1 + block*ATA_BLOCKSIZE] = (readValue >> 8) & 0xFF;
-        }
+        uint16_t readValue;
 
         for(int i = 0; i < ATA_BLOCKSIZE; i++) {
-            // uint16_t is actually TWO char's long!
-            //    terminal_printf("%x ", (int)(buffer_byte[i] & 0xFF));
-            //   terminal_printf("%x ", (int)((buffer_byte[i] >> 8) & 0xFF));
+            readValue = inports(device_offsets[bus][drive] + ATA_DATA);
 
+            buffer_short[i+block*ATA_BLOCKSIZE] = readValue;
         }
 
-        // terminal_printf("%x ", (int)(buffer_byte[0] & 0xFF));
-        // terminal_printf("%x ", (int)((buffer_byte[0] >> 8) & 0xFF));
+        // Splits u16_t into 2*u8_t
+        for(int i = 0; i < ATA_BLOCKSIZE; i++) {
+            buffer_byte[i*2] = (int)(buffer_short[i]);
+            buffer_byte[i*2+1] = (int)((buffer_short[i] >> 8) & 0xFF);
+        }
 
-        //terminal_printf("%x ", buffer[0]);
-        //terminal_printf("%x ", buffer[1]);
+        // for(int i = 0; i < 6; i++) {
+        //     terminal_printf("%x ", (int)(buffer_short[i] & 0xFF));
+        //     terminal_printf("%x ", (int)((buffer_short[i] >> 8) & 0xFF));
+        // }
 
     }
+
+    *buffer = buffer_byte;
 
     return true;
 }

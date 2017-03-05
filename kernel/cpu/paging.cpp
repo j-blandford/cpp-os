@@ -69,14 +69,6 @@ void paging_install() {
     init_paging_dir(page_directory);
     init_paging_table(page_directory, page_table);
 
-    // for(unsigned int i=0; i<frame_height*frame_width*(frame_depth/8)/PAGE_SIZE; i++)
-    // {
-    //     page_table[0][(int) fb_loc/4096-i].rw   =1;
-    //     page_table[0][(int) fb_loc/4096-i].access_lvl=0;
-    //     page_table[0][(int) fb_loc/4096-i].physical_address =((int)fb_loc/4096)+i;
-    //     page_table[0][(int) fb_loc/4096-i].present =1;
-    // }
-
     for(int i=0; i<1024; i++)
     {
         page_directory[i].present    = 1;
@@ -84,8 +76,6 @@ void paging_install() {
         page_directory[i].access_lvl = 0;
         page_directory[i].table_address   = (uint32_t)(page_table[i]) >> 12;
     }
-
-
 
     // // set up cr3 to point to the beginning address of our paging directories
     set_paging_pointer(page_directory);
