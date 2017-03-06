@@ -1,6 +1,8 @@
 #include <stdbool.h> 
 #include <stddef.h> 
 
+#include <std/bitset.h>
+
 #include <tty.h> 
 #include <cpu/idt.h> 
 
@@ -55,24 +57,59 @@ namespace Filesystems {
 
         terminal_printf("Browsing directory: %s\n", path);
 
-        //ATA::resetATA(bus, drive);
+        std::bitset<32> bitMask(0x5542AA8A);
+        // for(int i = 0; i < 32; i++ ) {
+        //     if(i % 8 == 0 ) terminal_putchar('|', RGBA(0xFF0000));
+        //     if(bitMask.test(i)) {
+        //         terminal_putchar('1', RGBA(0xFFFF00));
+        //     } else {
+        //         terminal_putchar('0', RGBA(0xFFFF00));
+        //     }
+            
+        //     //terminal_printf("%x ", bitMask[i]);
+        //   //  terminal_putchar(bitMask[i], RGBA(0xFFFF00));
+        // }
+
         ATA::read(bus, drive, &dirBytes, 1, 512);
 
         terminal_writestring("\n");
 
-        //memcpy(dir_table, dirBytes, sizeof(fat_direntry_t)*16);
+        // lets map this directory's structure...
+        size_t index = 0;
+        while(index < 512) {
+            if(dirBytes[index+11] != 0x0F) {
+                // Normal short folder name (8+3) structure
+                for(size_t offset = 0; offset <= 11; offset++) {
+                    char dirChar = dirBytes[index+offset];
 
-        for(size_t i = 0; i < 4; i++) {
-            for(size_t offset = 0; offset < 12; offset++) {
-                char dirChar = *(dirBytes+sizeof(char)*offset+sizeof(fat_direntry_t)*i);
+                    if(dirChar != 0x20 && dirChar != 0x10) terminal_putchar(dirChar, RGBA(0xFFFF00));
+                }
+            } 
+            else {
+                // We have found a LONG FOLDERNAME
+                for(int j = 0; j <= 32; j++) {
+                    if(bitMask.test(31-j) && dirBytes[index+j] != 0xFF && dirBytes[index+j] != 0x00) 
+                        terminal_putchar(dirBytes[index+j], RGBA(0xFFFF00));
+                }
 
-                if(dirChar != 0x20) terminal_putchar(dirChar, RGBA(0xFFFF00));
+                index += 32; // skip the short-folder name representation at the moment
             }
-            
-            //terminal_printf("%x ", (int)(dirBytes[i] & 0xFF));
-            //terminal_printf("%d\n", sizeof(fat_direntry_t));
-            //terminal_writestring(dir_table[i].name);
             terminal_writestring("   DIR \n");
+
+            index += 32;
         }
+
+        // for(size_t i = 0; i < 4; i++) {
+        //     for(size_t offset = 0; offset < 12; offset++) {
+        //         char dirChar = *(dirBytes+sizeof(char)*offset+sizeof(fat_direntry_t)*i);
+
+        //         if(dirChar != 0x20 && dirChar != 0x10) terminal_putchar(dirChar, RGBA(0xFFFF00));
+        //     }
+            
+        //     //terminal_printf("%x ", (int)(dirBytes[i] & 0xFF));
+        //     //terminal_printf("%d\n", sizeof(fat_direntry_t));
+        //     //terminal_writestring(dir_table[i].name);
+        //     terminal_writestring("   DIR \n");
+        // }
     }
 }
