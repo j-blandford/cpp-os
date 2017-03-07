@@ -37,10 +37,10 @@ void terminal_initialize(void) {
 	}
 	terminal_writelog("TTY Initialised");
 
-    string init_string = "Terminal Initialised"; 
-    init_string += string(" - C++ functions enabled! \n"); 
+	string init_string = "Terminal Initialised"; 
+	init_string += string(" - C++ functions enabled! \n"); 
 
-    terminal_writestring((char * )init_string); 
+	terminal_writestring((char * )init_string); 
 }
 
 void terminal_writelog(char* data) {
@@ -103,10 +103,16 @@ void terminal_clear(void) {
 
 void terminal_putchar(const char c, RGBA color) {
 	if(c == '\n') {
-    	terminal_column = 0;
-   		terminal_row++;
-    	return;
-    } 
+		terminal_column = 0;
+		terminal_row++;
+		return;
+	} 
+
+	if(c == '\t') {
+		// support tabs
+		terminal_column += TAB_WIDTH - terminal_column % TAB_WIDTH;
+		return;
+	}
 
 	terminal_putentryat(c, color, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {

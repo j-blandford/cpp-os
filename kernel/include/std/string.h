@@ -3,73 +3,57 @@
 #include <stddef.h>
 #include <std.h>
 
+// TODO: Fix string class
 
 int strlen( char * ptr );
 void strncpy( char * ptr_dest, char * ptr_src, int n );
+char tolower(char upper);
 
 class string {
 	int length;               // length of the string
 	char * buff;              // pointer to strorage
 public:
+	// Constructors
+	string() : length(0), buff(NULL) { }
+	string(char* init_val) : length(strlen(init_val)), buff(new char[length]) { 
+		strncpy( buff, init_val, length );  // copy init value into storage
+	}
+	string(char init_val) : length(1), buff(new char[1]) {
+		buff[0] = init_val;
+	}
+	string(const string& other) : length(other.length), buff(new char[length]) {
+		strncpy( buff, other.buff, length );
+	}
+	~string() { 
+		delete [] buff; 
+	}
 
-	// Constructors: default, from a string literal (char*), copy constr.
-	// When possible, constructors should use initialization lists rather 
-	// than assignments. Thus:
-	//        buff( new char[length] )   in the init list is better that
-	//        buff = new char[length]    in the body of the constructor,
-	//   although they do the same thing -- allocate dyn. memory
-
-	string() : length(0), buff(NULL) 
-		{
-		}
-
-	string( char* init_val ) : 
-		length( strlen(init_val) ),    // count the length of init value
-		buff(   new char[length] )     // allocate storage 
-		{ 
-			strncpy( buff, init_val, length );  // copy init value into storage
-		}
-
-	string( const string& other ) :
-		length( other.length ),        
-		buff(   new char[length] ) 
-		{
-			strncpy( buff, other.buff, length );
-		}
-
-	~string() 
-		{ 
-			delete [] buff; 
-		}
-
+	// Member methods (need to provide more to meet the STL standards...)
 	int size() { return length; }
 	char* c_str() { return buff; }
-	
-	// operator= returns  string&  to allow multiple assignments
 
-	string& operator= ( const string& other )
-		{
-			if( this != &other ){          // guard against  a = a;  
-				delete [] buff;              // release old memory & then
-				length = other.length;       // allocate new memory 
-				buff = new char[length];        
-				strncpy( buff, other.buff, length );
-			}
-			return *this;                  // return a reference to itself
-		}                                // to allow a = b = c; 
-		
-	// concatenation of strings; we should also handle chars.
-	// notice that + is overloaded thrice: 
-	//    string + string,  string + char, char + string 
-	// making operator+ a _friend_ allows for all three types; while
-	// the first two can be done with a _member_ as well, the last cannot!
+	// Operator overloads
+	string& operator= ( const string& other ) {
+		if( this != &other ){          // guard against  a = a;  
+			length = other.length;       // allocate new memory 
+			buff = new char[length];        
+			strncpy( buff, other.buff, length );
+		}
+		return *this;
+	}
+
+	char& operator[] (int index ) {
+		if( index < 0 || index > length ) {
+		//	return '\0';
+		}
+		return buff[index];
+	}
 
 	friend string operator+( const string& s1, const string& s2 );
 	friend string operator+( const string& s, char c );
 	friend string operator+( char c, const string& s );
 
-	string& operator+=( const string& s2 )
-	{
+	string& operator+=( const string& s2 ) {
 		strncpy( this->buff + this->length, s2.buff, s2.length);
 
 		this->length += s2.length;
@@ -77,27 +61,24 @@ public:
 		return *this;
 	}
 
+	string& operator+=( const char& s2 ) {
+		char* newBuff = new char[this->length+1];
+		strncpy( newBuff, buff, this->length);
+		
+		newBuff[this->length] = s2;
 
-	operator char*() const { return this->buff; };
+		this->buff = newBuff;
+		this->length += 2;
 	
-//  friend ostream& operator<< ( ostream&, const string& );
+		return *this;
+	}
 
-	// finally, we want to reveal characters of a string for lookup
-	// and assignment (hence we return a _reference_ to a char!)
+	operator char*() const { 
+		char * nullBuffer = new char[this->length+1];
 
-	char& operator[] (int index )
-		{
-			if( index < 0 || index > length ) {
-				//return '\0';
-			}
-			return buff[index];
-		}
+		strncpy( nullBuffer, buff, this->length);
+		nullBuffer[this->length] = '\0';
+
+		return nullBuffer; 
+	};
 };
-
-
-// ostream& operator<< ( ostream& os, const string& s )
-// {
-//   // print char after char from buff
-//   for( int i=0; i < s.length; i++ )  os.put( s.buff[i] );
-//   return os;         // this is to allow multiple <<, as in  cout << a << b;
-// }
