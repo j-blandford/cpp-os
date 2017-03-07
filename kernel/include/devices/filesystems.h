@@ -2,19 +2,28 @@
 
 #include <stddef.h>
 
-#include <devices/ata.h>
-
-#define PERM_READ 1U << 1
-#define PERM_WRITE 1U << 2
-
 namespace Filesystems {
 
 	static std::vector<string> tokenizePath(string path);
+
+	enum FATAttributes : uint8_t {
+		noEntry = 0x00,
+		shortNameFile = 0x20,
+		shortName = 0x10,
+		longName = 0x0F
+	};
+
+	enum FATPermissions {
+		READ_ONLY = 1 << 0,
+		READ_WRITE = 1 << 1
+	};
 
 	class DirectoryEntry {
 	public:
 		char * name;
 		char*  altName;     // used in FAT16 for the long-hand name
+
+		FATAttributes attr;
 
 		// TODO: Create a Timestamp class
 		short mod_time;      // modification time (H:m:s)
@@ -22,18 +31,25 @@ namespace Filesystems {
 		short crt_time;      // creation time (H:m:s)
 		short crt_date;      // creation date
 
-		unsigned long permissions;
+		FATPermissions permissions;
 		short location;     // generic "cluster" location
 
-		DirectoryEntry() : permissions(PERM_READ | PERM_WRITE), location(0), name(new char[50]) { }
-		DirectoryEntry(char* name) : permissions(PERM_READ | PERM_WRITE), location(0) { }
+		DirectoryEntry() : permissions(FATPermissions::READ_WRITE), location(0), name(new char[50]) { }
+		DirectoryEntry(char* name) : permissions(FATPermissions::READ_WRITE), location(0) { }
 		~DirectoryEntry() {
 			delete name;
 			delete altName;
 		}
 	};
 
-	// TODO: Create base "FS" interface that can be inherited, providing certain functions which are independent of the drive
+	// TODO: Flesh out this stub class
+	class FS_Device {
+	public:
+		virtual std::vector<DirectoryEntry> readDirectoryTable(size_t sectorIndex) = 0;
+		char* name;
+		uint16_t capacity;
+	};
+
 	typedef struct fat_header {
 		unsigned short sectorSize;     // sector size, usually 512
 		int secPerCluster;      // how many sectors make up a cluster (usually 2)
@@ -47,7 +63,7 @@ namespace Filesystems {
 		uint32_t numSectors;    // total number of sectors in the volume.
 	}__attribute__((packed)) fat_header_t;
 
-	class FAT16 : public ATA_Device {
+	class FAT16 {
 		uint8_t* headerBytes; 
 		fat_header_t header_info;
 
@@ -66,6 +82,6 @@ namespace Filesystems {
 		void setPort(uint16_t ioPort);
 
 		bool parseHeader();
-		std::vector<DirectoryEntry> readDirectoryTable(char* path = "/");
+		std::vector<DirectoryEntry> readDirectoryTable(size_t sectorIndex);
 	};
 }

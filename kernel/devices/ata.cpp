@@ -13,6 +13,8 @@
 #include <devices/filesystems.h>
 #include <devices/ata.h>
 
+std::vector<Filesystems::FAT16> ATA::found_devices = std::vector<Filesystems::FAT16>();
+
 const uint16_t device_offsets[2][2] = {
 	{ ATA_0_MASTER, ATA_0_SLAVE },
 	{ ATA_1_MASTER, ATA_1_SLAVE }
@@ -159,8 +161,7 @@ bool ATA::read(int bus, int drive, uint8_t** buffer, size_t num_blocks, int offs
 	return true;
 }
 
-std::vector<ATA_Device> ATA::findATA() {
-	std::vector<ATA_Device> found_devices = std::vector<ATA_Device>();
+std::vector<Filesystems::FAT16> ATA::findATA() {
 
 	for(int bus = 0; bus < 2; bus++) {
 		for(int drive = 0; drive < 2; drive++) {
@@ -182,12 +183,6 @@ std::vector<ATA_Device> ATA::findATA() {
 				if(device.parseHeader()) {
 					terminal_multistring(">>>> Success! ", RGBA(0x00FF00), "Verified FAT16 drive\n", RGBA(0xFFFFFF));
 
-					std::vector<Filesystems::DirectoryEntry> dir = device.readDirectoryTable("/");
-
-					for(auto it = dir.begin(); it != dir.end(); it++) {
-						terminal_printf("%s \t\t DIR %x\n", (*it).name, &(*it).name);
-					}
-
 					found_devices.push_back(device);
 				} 
 				else {
@@ -199,12 +194,35 @@ std::vector<ATA_Device> ATA::findATA() {
 	return found_devices;
 }
 
+std::vector<Filesystems::DirectoryEntry> ATA::getDirectory(int deviceIndex, size_t sectorIndex) {
+	std::vector<Filesystems::DirectoryEntry> dir = ATA::found_devices[deviceIndex].readDirectoryTable(sectorIndex); // 544 = "boot"
+
+	for(auto it = dir.begin(); it != dir.end(); it++) {
+		char* fileType = new char[4];
+
+		if((*it).attr == Filesystems::FATAttributes::shortNameFile) {
+			strncpy(fileType, "FILE", 4);
+		} 
+		else {
+			strncpy(fileType, "DIR", 3);
+		}
+		
+		terminal_printf("%s \t\t %s @ %x\n", (*it).name, fileType, (*it).location);
+	}
+
+	return dir;
+}
+
+void ATA::grabAll() {
+	ATA::found_devices = ATA::findATA();
+}
+
 void init_ata() {
 	//timer_phase(1000);
 	//set_irq_handler(0, (isr_t)&timer_handler);
 
 	terminal_writestring("------------------------------------\n");
 	terminal_writestring("Identifying ATA devices...\n");
-	std::vector<ATA_Device> ata_devices = ATA::findATA();
+	ATA::grabAll();
 	terminal_writestring("------------------------------------\n");
 }

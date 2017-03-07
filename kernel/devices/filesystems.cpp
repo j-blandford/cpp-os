@@ -51,41 +51,70 @@ namespace Filesystems {
 		return true;
 	}
 
-	std::vector<DirectoryEntry> FAT16::readDirectoryTable(char* path) {
+	std::vector<DirectoryEntry> FAT16::readDirectoryTable(size_t sectorIndex) {
 		std::vector<DirectoryEntry> directoryMap = std::vector<DirectoryEntry>();
-
 		std::bitset<32> bitMask(0x5542AA8A); // this is used to select out the long filename's data
 
-		ATA::read(bus, drive, &dirBytes, 1, 512);
+		// may be above 1 sector... look into this
+		size_t nSectors = 1;
 
-		// lets map this directory's structure...
+		// Grab the dir table
+		ATA::read(bus, drive, &dirBytes, nSectors, sectorIndex);
+
 		size_t index = 0;
-		while(index < 512) {
+		while(index < nSectors*ATA_BLOCKSIZE) {
 			DirectoryEntry* dirEntry = new DirectoryEntry();
 
-			if(dirBytes[index+11] != 0x0F) {
-				// Normal short folder name (8+3) structure
-				char name[11] = {0};
+			dirEntry->attr = static_cast<FATAttributes>(dirBytes[index+11]);
 
+			if(dirEntry->attr == FATAttributes::shortName || dirEntry->attr == FATAttributes::shortNameFile) {
+				// Normal short name (8+3) structure
+				char name[11] = {0};
+				int length = 0;
+
+				bool addSeperator = false; // adds a '.' char into the filename if 0x20 is found (might be bugged if the folder name has a space in it...)
+
+				dirEntry->location = dirBytes[index+26] | (dirBytes[index+27] << 8); // 16-bit cluster location
+
+				// the first 11 bytes store the full short foldername. Let us extract it out...
 				for(size_t offset = 0; offset <= 11; offset++) {
 					char dirChar = dirBytes[index+offset];
 
-					if(dirChar != 0x20 && dirChar != 0x10) 
-						dirEntry->name[offset] = tolower(dirChar);
+					if(dirChar != 0x20 && dirChar != 0x10) { // 0x20 and 0x10 are padding or "file+ext" seperator byte
+						if(addSeperator) {
+							dirEntry->name[length] = '.';
+							length++;
+
+							addSeperator = false;
+						}
+
+						dirEntry->name[length] = tolower(dirChar);
+						length++;
+					} 
+					else {
+						addSeperator = true;
+					}
 				}
 			} 
-			else {
+			else if(dirEntry->attr == FATAttributes::longName) {
 				// We have found a LONG FOLDERNAME
-				char name[50];
+				char name[32];
 				int length = 0;
 
-				for(int j = 0; j <= 32; j++) {
+				// Our foldername is embedded inside 32-bytes. We have to extract it out the long way
+				for(size_t j = 0; j <= 32; j++) {
+					// our bitmask contains a series of 0 and 1s which allow us to extract the name correctly
 					if(bitMask.test(31-j) && dirBytes[index+j] != 0xFF && dirBytes[index+j] != 0x00) {
 						dirEntry->name[length] = dirBytes[index+j];
 						length++;
 					}
 				}
 				index += 32; // skip the short-folder name representation at the moment
+			}
+			else if(dirEntry->attr == FATAttributes::noEntry) {
+				// there isn't a file here, so just skip to the next index entry
+				index += 32;
+				continue;	
 			}
 
 			directoryMap.push_back(*dirEntry);

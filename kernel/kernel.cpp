@@ -63,5 +63,13 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 			init_pci();
 			update_buffer(false);
 		}
+		else if(strncmp(buffer, "ls /", 4) == 0) {
+			ATA::getDirectory(0, 512);
+			update_buffer(false);
+		}
+		else if(strncmp(buffer, "ls boot", 7) == 0) {
+			ATA::getDirectory(0, 544);
+			update_buffer(false);
+		}
 	}
 }
