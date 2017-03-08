@@ -213,6 +213,33 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectory(int deviceIndex, size
 	return dir;
 }
 
+std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, size_t sectorIndex, string path) {
+	std::vector<Filesystems::DirectoryEntry> dir = std::vector<Filesystems::DirectoryEntry>();
+
+	// this function splits "path" into tokens delimited by '/' and then extracts out each folder and 
+	//		maps the structure (from the root node) to find the right table directory entry sector
+	bool found = false;
+	bool error = false;
+	size_t currentSector = 512; // 512 = root dir table sector
+	while(!found && !error) {
+		std::vector<Filesystems::DirectoryEntry> cDir = ATA::found_devices[deviceIndex].readDirectoryTable(currentSector);
+
+		for(auto it = cDir.begin(); it != cDir.end(); it++) {
+			if((*it).name == path) {
+				dir = ATA::found_devices[deviceIndex].readDirectoryTable(currentSector);
+				found = true;
+			}
+		}
+	}
+
+	if(error || !found) {
+		terminal_printf("Error: directory not found\n");
+	}
+	
+
+	return dir;
+}
+
 void ATA::grabAll() {
 	ATA::found_devices = ATA::findATA();
 }

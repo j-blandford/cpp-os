@@ -1,14 +1,17 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <std/string.h>
+//#include <std/string.h>
 
 #include <tty.h>
+#include <command.h>
 
 #include <cpu/io.h>
 
 #include <gfx/vga.h>
 #include <gfx/vesa.h>
+
+#include <devices/keyboard.h>
 
 static const size_t VGA_WIDTH = 120;
 static const size_t VGA_HEIGHT = 50;
@@ -22,6 +25,8 @@ uint16_t* terminal_buffer;
 static int X_FONTWIDTH = 8;
 static int Y_FONTWIDTH = 15; 
 static vec2 cursor_pos = { 0, 0 };
+
+char kb_buffer[1024];
 
 void terminal_initialize(void) {
 	terminal_row = 0;
@@ -188,4 +193,15 @@ void update_cursor(int row, int col)
 	outportb(0x3D4, 0x0E);
 	outportb(0x3D5, (unsigned char )((position>>8)&0xFF));
 
+}
+
+void tty_update() {
+		terminal_writestring("kernel", RGBA(0xDDDDDD));
+		terminal_writestring("> ", RGBA(0xFFFFFF));
+		update_buffer(false);
+
+		getsn(&kb_buffer[0], 1024);
+
+		Command::Parse(kb_buffer);
+	
 }

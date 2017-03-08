@@ -75,7 +75,7 @@ public:
     static std::vector<Filesystems::FAT16> findATA();
     static void grabAll();
     static std::vector<Filesystems::DirectoryEntry> getDirectory(int deviceIndex, size_t sectorIndex);
-
+    static std::vector<Filesystems::DirectoryEntry> getDirectoryPath(int deviceIndex, size_t sectorIndex, string path);
     // todo: ATAPI
     // todo: SCSI (maybe...)
 };

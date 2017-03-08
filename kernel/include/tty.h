@@ -17,6 +17,7 @@ extern uint16_t* terminal_buffer;
 // TODO: turn this into a class which either creates, or uses an existing, surface object
 //  this will allow us to have terminal windows :)
 
+void tty_update();
 
 void terminal_writelog(char* data);
 void terminal_writeerror(char* data);

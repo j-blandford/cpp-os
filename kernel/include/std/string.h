@@ -6,8 +6,14 @@
 // TODO: Fix string class
 
 int strlen( char * ptr );
+int strcmp(const char* s1, const char* s2);
+
 void strncpy( char * ptr_dest, char * ptr_src, int n );
 char tolower(char upper);
+
+char * strpbrk(const char *s, const char *accept);
+size_t strspn (const char *s, const char *accept);
+char * strtok(char *str, const char *delim);
 
 class string {
 	int length;               // length of the string
@@ -15,7 +21,8 @@ class string {
 public:
 	// Constructors
 	string() : length(0), buff(NULL) { }
-	string(char* init_val) : length(strlen(init_val)), buff(new char[length]) { 
+	string(char* init_val) : length(strlen(init_val)), buff(new char[length+1]) { 
+//		terminal_printf("INIT string(char*): %s @ %x", init_val, &init_val);
 		strncpy( buff, init_val, length );  // copy init value into storage
 	}
 	string(char init_val) : length(1), buff(new char[1]) {
@@ -52,6 +59,13 @@ public:
 	friend string operator+( const string& s1, const string& s2 );
 	friend string operator+( const string& s, char c );
 	friend string operator+( char c, const string& s );
+
+	bool operator== (const string& rhs) {
+		return strcmp(buff, (char*)rhs)  == 0;
+	}
+	bool operator== (const char*   rhs) {
+		return strcmp(buff, rhs) == 0;
+	}
 
 	string& operator+=( const string& s2 ) {
 		strncpy( this->buff + this->length, s2.buff, s2.length);

@@ -4,7 +4,7 @@
 
 namespace Filesystems {
 
-	static std::vector<string> tokenizePath(string path);
+	//static std::vector<string> tokenizePath(string path);
 
 	enum FATAttributes : uint8_t {
 		noEntry = 0x00,
@@ -34,7 +34,7 @@ namespace Filesystems {
 		FATPermissions permissions;
 		short location;     // generic "cluster" location
 
-		DirectoryEntry() : permissions(FATPermissions::READ_WRITE), location(0), name(new char[50]) { }
+		DirectoryEntry() : name(new char[50]), permissions(FATPermissions::READ_WRITE), location(0)  { }
 		DirectoryEntry(char* name) : permissions(FATPermissions::READ_WRITE), location(0) { }
 		~DirectoryEntry() {
 			delete name;

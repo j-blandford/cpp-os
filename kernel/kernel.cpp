@@ -50,26 +50,8 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 
 	interrupts_enable();
 
-	char buffer[1024];
-
+	// Main kernel loop (single-threaded currently... this slows down processing a lot)
 	while (true) {
-		terminal_writestring("kernel", RGBA(0xDDDDDD));
-		terminal_writestring("> ", RGBA(0xFFFFFF));
-		update_buffer(false);
-
-		getsn(&buffer[0], 1024);
-		
-		if(strncmp(buffer, "listpci", 7) == 0) {
-			init_pci();
-			update_buffer(false);
-		}
-		else if(strncmp(buffer, "ls /", 4) == 0) {
-			ATA::getDirectory(0, 512);
-			update_buffer(false);
-		}
-		else if(strncmp(buffer, "ls boot", 7) == 0) {
-			ATA::getDirectory(0, 544);
-			update_buffer(false);
-		}
+		tty_update();
 	}
 }
