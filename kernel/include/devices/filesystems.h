@@ -18,6 +18,21 @@ namespace Filesystems {
 		READ_WRITE = 1 << 1
 	};
 
+	// this is essentially a wrapper for linked list functionality in the allocation table
+	class FileAllocationTable {
+		int tableOffset;
+	public:
+		uint8_t table[512]; 
+		FileAllocationTable(uint8_t* table_ptr, int offset) : tableOffset(offset){ memcpy(table, table_ptr, 512); }
+		FileAllocationTable(int offset) : tableOffset(offset) { }
+		FileAllocationTable() { }
+
+		uint16_t nextSector(uint16_t index);
+		std::vector<uint16_t> follow(uint16_t start); // returns a vector of 16-bit integers (the clusters in the chain)
+
+		void printFAT();
+	};
+
 	class DirectoryEntry {
 	public:
 		char * name;
@@ -64,8 +79,12 @@ namespace Filesystems {
 	}__attribute__((packed)) fat_header_t;
 
 	class FAT16 {
-		uint8_t* headerBytes; 
+		uint8_t headerBytes[512]; 
+		uint8_t fatTable[512]; 
+
 		fat_header_t header_info;
+
+		FileAllocationTable fat;
 
 	public:
 		uint16_t port;
@@ -75,13 +94,23 @@ namespace Filesystems {
 
 		uint8_t* dirBytes; 
 
-		FAT16() { }
+		FAT16() { 
+
+		}
 		FAT16(const uint16_t& port, const int& bus, const int& drive) : port(port), bus(bus), drive(drive) { }
 		~FAT16() { }
 
-		void setPort(uint16_t ioPort);
+		void printFAT();
+
+		bool verifyDevice();
+
+		uint16_t * getChain(std::vector<uint16_t> chain);
+
+		std::vector<int> getSectorIndices(uint16_t startSector);
 
 		bool parseHeader();
+		bool getAllocationTable();
 		std::vector<DirectoryEntry> readDirectoryTable(size_t sectorIndex);
+		std::vector<DirectoryEntry> readDirectoryPath(string path);
 	};
 }

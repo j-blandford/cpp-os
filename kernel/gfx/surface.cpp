@@ -71,6 +71,15 @@ void Surface::apply(bool fullRefresh) {
     }
 }
 
+void Surface::scrollUp(size_t num_lines) {
+    for(size_t y = num_lines; y < this->dim.y - num_lines; y++) {
+        size_t from_loc = this->pos.x*(frame_depth/8) + (y+this->pos.y)*(frame_pitch);
+        size_t to_loc = this->pos.x*(frame_depth/8) + (y+this->pos.y-num_lines)*(frame_pitch);
+
+        memcpy(&this->buff_loc[to_loc], &this->buff_loc[from_loc], this->s_pitch); // copy the buffer line by line
+    }
+}
+
 void Surface::bringToFront() {
     z_index = 10;
 }

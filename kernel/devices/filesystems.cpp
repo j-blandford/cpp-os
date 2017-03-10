@@ -16,14 +16,55 @@
 #include <buffer.h> 
 
 namespace Filesystems {
-	void FAT16::setPort(uint16_t ioPort) {
-		this->port = ioPort;
+
+	void FileAllocationTable::printFAT() {
+		// for(int i = 0; i < 512; i++) {
+		// 	terminal_printf("%x ", table[i]);
+		// }	
+	}
+
+	uint16_t FileAllocationTable::nextSector(uint16_t index) {
+		return table[index*2];
+	}
+
+	std::vector<uint16_t> FileAllocationTable::follow(uint16_t start) {
+		// "start" is the value grabbed from the directory tables!!!
+		std::vector<uint16_t> *chain = new std::vector<uint16_t>();
+
+		uint16_t current = start;
+		while(current != 0xFF) {
+			terminal_printf("\t\t  new chain... %x\n", current);
+			update_buffer(false);
+
+			(*chain).push_back(current);
+			current = table[current*2]; // | table[current*2+1] >> 8;
+
+
+		}
+
+		return *chain;
+	}
+
+	void FAT16::printFAT() {
+		for(int i = 0; i < 512; i++) {
+			terminal_printf("%x ", fat.table[i]);
+		}
+	}
+
+	bool FAT16::verifyDevice() {
+		if(this->parseHeader()) {
+			this->getAllocationTable();
+		} else {
+			return false;
+		}
 	}
 
 	bool FAT16::parseHeader() {
-		ATA::read(bus, drive, &headerBytes, 1, 0);
+		const uint8_t header[3] = {0xEB, 0x3C, 0x90}; // FAT16 header bytes
 
-		uint8_t header[3] = {0xEB, 0x3C, 0x90}; // FAT16 header bytes
+		uint8_t* tempHeader = new uint8_t[512];
+		ATA::read(bus, drive, &tempHeader, 1, 0);
+		memcpy(&headerBytes, tempHeader, 512);
 
 		for(int i = 0; i < 3; i++) {
 			if(*(headerBytes + i*sizeof(char)) != header[i]) return false;
@@ -33,7 +74,7 @@ namespace Filesystems {
 		// TODO: make a struct that follows the byte pattern of the header so we can hydrate the class in with malloc+memset
 		header_info.sectorSize = (*(headerBytes + 11*sizeof(char))) | (*(headerBytes + 12*sizeof(char)) << 8); // little-endian -> big-endian
 		header_info.secPerCluster = *(headerBytes + 13*sizeof(char));
-		header_info.numReservedSectors = *(headerBytes + 15*sizeof(char)); // offset 14 would be zero in like 99.9999% of cases
+		header_info.numReservedSectors = *(headerBytes + 14*sizeof(char)); // offset 15 would be zero in like 99.9999% of cases
 		header_info.numFATs = *(headerBytes + 16*sizeof(char));
 		header_info.numDirectories = (*(headerBytes + 17*sizeof(char))) | (*(headerBytes + 18*sizeof(char)) << 8);
 		header_info.numSectors = (*(headerBytes + 19*sizeof(char))) | (*(headerBytes + 20*sizeof(char)) << 8);
@@ -45,18 +86,73 @@ namespace Filesystems {
 					  | (*(headerBytes + 41*sizeof(char)) << 16) 
 					  | (*(headerBytes + 42*sizeof(char)) << 24);
 
-		// terminal_printf("         Volume serial: %x\n", volume_serial);
-		// terminal_printf("         Sector size: %x\n", header_info.sectorSize);
+		terminal_printf("\tVolume serial: %x\n", volume_serial);
+//		terminal_printf("         numDirectories: %x\n",header_info.numDirectories);
+
+		return true;
+	}
+
+	uint16_t * FAT16::getChain(std::vector<uint16_t> chain) {
+		// pass the return value of fat->follow() into this to grab the actual data
+		uint16_t dataStart = 512 + ((header_info.numDirectories * 32) / header_info.sectorSize); // disk.img: this evaluates to 512+32 = 544
+		uint16_t* chainBuffer = new uint16_t[chain.size()*header_info.sectorSize*header_info.secPerCluster];
+
+		for(int i = 0; i < chain.size(); i++) {
+			int sectorIndex = (chain[i] - 2) * header_info.secPerCluster + dataStart;
+
+			ATA::read(bus, drive, &chainBuffer, 1, sectorIndex);
+
+			//memcpy(&(buffer[i*header_info.sectorSize]), block, header_info.sectorSize);
+			// terminal_printf("%d ", sectorIndex);
+		}
+
+		return chainBuffer;
+	}
+
+	std::vector<int> FAT16::getSectorIndices(uint16_t startSector) {
+
+		std::vector<uint16_t> chain = this->fat.follow(startSector);
+		std::vector<int> sectors = std::vector<int>();
+
+		// pass the return value of fat->follow() into this to grab the actual data
+		uint16_t dataStart = 512 + ((header_info.numDirectories * 32) / header_info.sectorSize); // disk.img: this evaluates to 512+32 = 544
+		//uint16_t* chainBuffer = new uint16_t[chain.size()*header_info.sectorSize*header_info.secPerCluster];
+
+		for(int i = 0; i < chain.size(); i++) {
+			int sectorIndex = (chain[i] - 2) * header_info.secPerCluster + dataStart;
+
+			//ATA::read(bus, drive, &chainBuffer, 1, sectorIndex);
+
+			sectors.push_back(sectorIndex);
+
+			//memcpy(&(buffer[i*header_info.sectorSize]), block, header_info.sectorSize);
+			//terminal_printf("%d ", sectorIndex);
+		}
+		
+		return sectors;
+	}
+
+	bool FAT16::getAllocationTable() {
+		// Let us grab the allocation table
+		fat = FileAllocationTable(header_info.numReservedSectors);
+
+		uint8_t* tempFat = new uint8_t[512];
+		ATA::read(bus, drive, &tempFat, 1, header_info.numReservedSectors);
+		memcpy(&(fat.table), tempFat, 512);
+
+		// Now we can do some directory management (and testing)
+		// std::vector<uint16_t> chain = this->fat.follow(0x02); // should follow the "boot" directory chain
+
+		// uint16_t* clusters = getChain(chain); // grab the data from the cluster chain
 
 		return true;
 	}
 
 	std::vector<DirectoryEntry> FAT16::readDirectoryTable(size_t sectorIndex) {
-		std::vector<DirectoryEntry> directoryMap = std::vector<DirectoryEntry>();
-		std::bitset<32> bitMask(0x5542AA8A); // this is used to select out the long filename's data
+		const std::bitset<32> bitMask(0x5542AA8A); // this is used to select out the long filename's data
+		const size_t nSectors = 1; // may be above 1 sector... look into this
 
-		// may be above 1 sector... look into this
-		size_t nSectors = 1;
+		std::vector<DirectoryEntry> directoryMap = std::vector<DirectoryEntry>();
 
 		// Grab the dir table
 		ATA::read(bus, drive, &dirBytes, nSectors, sectorIndex);
@@ -114,7 +210,7 @@ namespace Filesystems {
 			else if(dirEntry->attr == FATAttributes::noEntry) {
 				// there isn't a file here, so just skip to the next index entry
 				index += 32;
-				continue;	
+				continue;
 			}
 
 			directoryMap.push_back(*dirEntry);
@@ -123,5 +219,11 @@ namespace Filesystems {
 		}
 
 		return directoryMap;
+	}
+
+	std::vector<DirectoryEntry> FAT16::readDirectoryPath(string path) {
+		std::vector<uint16_t> chain = this->fat.follow(0x02); // should follow the "boot" directory chain
+		uint16_t* clusters = getChain(chain); // grab the data from the cluster chain
+		return FAT16::readDirectoryTable(clusters[0]);
 	}
 }

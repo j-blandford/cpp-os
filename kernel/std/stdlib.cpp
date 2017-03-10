@@ -121,6 +121,21 @@ int putchar(int ic) {
 }
 
 
+int atoi(char* str) {
+	int returnVal = 0;
+
+	int multiplier = 1;
+
+	if(str[0] == '-') 
+		multiplier = -1;
+
+	for(int i = 0; i < strlen(str); i++) {
+		returnVal = returnVal*10 + str[i] - '0';
+	}
+
+	return returnVal * multiplier;
+}
+
 
 static bool print(char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;

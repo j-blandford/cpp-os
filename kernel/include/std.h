@@ -48,3 +48,4 @@ char* ltoa(unsigned long long value, char* buffer, int radix );
 
 // Integer functions
 int itoa(int value, char *sp, int radix);
+int atoi(char* str);

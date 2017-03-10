@@ -53,6 +53,8 @@ public:
 
     void apply(bool fullRefresh = true); // Apply the Surface to the backbuffer
 
+    void scrollUp(size_t num_lines); // this needs to be inside a TTY:: class (which will embed a Surface object within it)
+
     void bringToFront();
     void setZindex(uint8_t z_index);
 

@@ -17,12 +17,6 @@ int strcmp(const char* s1, const char* s2) {
 	return *(const unsigned char*)s1-*(const unsigned char*)s2;
 }
 
-char tolower(char upper) {
-	if (upper <= 'Z' && upper >= 'A')
-		return upper - ('Z' - 'z');
-	return upper;
-}
-
 int strncmp(const char *s1, const char *s2, size_t n) {
 	for ( ; n > 0; s1++, s2++, --n)
 			if (*s1 != *s2)
@@ -31,6 +25,13 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 					return 0;
 	return 0;
 }
+
+char tolower(char upper) {
+	if (upper <= 'Z' && upper >= 'A')
+		return upper - ('Z' - 'z');
+	return upper;
+}
+
 
 char *strcat(char *dest, const char *src) {
 	char *rdest = dest;

@@ -57,9 +57,11 @@
 #define ATA_COMMAND_WRITE		0x30    /* write data */
 #define ATA_COMMAND_IDENTIFY		0xec
 
+extern std::vector<Filesystems::FAT16*> found_devices;
+
 class ATA {
 public: 
-    static std::vector<Filesystems::FAT16> found_devices;
+    
     // programmed i/o mode (all ATA devices support this)
     static uint16_t * readPIO(int bus, int drive, int size);
     static void writePIO(int bus, int drive, uint16_t * buffer, int size);
@@ -70,12 +72,12 @@ public:
 
     static bool prepare(int bus, int drive, int command, size_t num_blocks, int offset); // prepares the device for a command's data packet
     static bool read(int bus, int drive, uint8_t** buffer, size_t num_blocks, int offset);
+    static bool read(int bus, int drive, uint16_t** buffer, size_t num_blocks, int offset);
     static bool wait(int bus, int drive, int mask, int waitForState);
 
-    static std::vector<Filesystems::FAT16> findATA();
-    static void grabAll();
+    static void findATA();
     static std::vector<Filesystems::DirectoryEntry> getDirectory(int deviceIndex, size_t sectorIndex);
-    static std::vector<Filesystems::DirectoryEntry> getDirectoryPath(int deviceIndex, size_t sectorIndex, string path);
+    static std::vector<Filesystems::DirectoryEntry> getDirectoryPath(int deviceIndex, char * path);
     // todo: ATAPI
     // todo: SCSI (maybe...)
 };

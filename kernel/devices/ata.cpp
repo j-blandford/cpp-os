@@ -13,7 +13,7 @@
 #include <devices/filesystems.h>
 #include <devices/ata.h>
 
-std::vector<Filesystems::FAT16> ATA::found_devices = std::vector<Filesystems::FAT16>();
+std::vector<Filesystems::FAT16*> found_devices = std::vector<Filesystems::FAT16*>();
 
 const uint16_t device_offsets[2][2] = {
 	{ ATA_0_MASTER, ATA_0_SLAVE },
@@ -124,8 +124,30 @@ bool ATA::prepare(int bus, int drive, int command, size_t num_blocks, int offset
 	return true;  
 }
 
+bool ATA::read(int bus, int drive, uint16_t** buffer, size_t num_blocks, int offset) {
+	uint16_t buffer_short[num_blocks * ATA_BLOCKSIZE] = {0};
+
+	ATA::prepare(bus, drive, ATA_COMMAND_READ, num_blocks, offset);
+
+	for(size_t block = 0; block < num_blocks; block++) {
+		ATA::wait(bus, drive, ATA_STATUS_DRQ, ATA_STATUS_DRQ);
+
+		uint16_t readValue;
+
+		for(int i = 0; i < ATA_BLOCKSIZE; i++) {
+			readValue = inports(device_offsets[bus][drive] + ATA_DATA);
+
+			buffer_short[i+block*ATA_BLOCKSIZE] = readValue;
+		}
+	}
+
+	*buffer = buffer_short;
+
+	return true;
+}
+
+
 bool ATA::read(int bus, int drive, uint8_t** buffer, size_t num_blocks, int offset) {
-	
 	uint16_t buffer_short[num_blocks * ATA_BLOCKSIZE] = {0};
 	uint8_t buffer_byte[num_blocks * ATA_BLOCKSIZE * 2] = {0};
 
@@ -161,7 +183,7 @@ bool ATA::read(int bus, int drive, uint8_t** buffer, size_t num_blocks, int offs
 	return true;
 }
 
-std::vector<Filesystems::FAT16> ATA::findATA() {
+void ATA::findATA() {
 
 	for(int bus = 0; bus < 2; bus++) {
 		for(int drive = 0; drive < 2; drive++) {
@@ -178,12 +200,10 @@ std::vector<Filesystems::FAT16> ATA::findATA() {
 			ATA::initializeDevice(bus, drive);
 
 			if(bus == 0 && drive == 0) {
-				Filesystems::FAT16 device = Filesystems::FAT16(base_offset, bus, drive);
+				found_devices.push_back(new Filesystems::FAT16(base_offset, bus, drive));
 
-				if(device.parseHeader()) {
+				if(found_devices[0]->verifyDevice()) {
 					terminal_multistring(">>>> Success! ", RGBA(0x00FF00), "Verified FAT16 drive\n", RGBA(0xFFFFFF));
-
-					found_devices.push_back(device);
 				} 
 				else {
 					terminal_multistring(">>>> Error! ", RGBA(0xFF0000), " Drive is corrupted\n", RGBA(0xFFFFFF));
@@ -191,29 +211,9 @@ std::vector<Filesystems::FAT16> ATA::findATA() {
 			}
 		}
 	}
-	return found_devices;
 }
 
-std::vector<Filesystems::DirectoryEntry> ATA::getDirectory(int deviceIndex, size_t sectorIndex) {
-	std::vector<Filesystems::DirectoryEntry> dir = ATA::found_devices[deviceIndex].readDirectoryTable(sectorIndex); // 544 = "boot"
-
-	for(auto it = dir.begin(); it != dir.end(); it++) {
-		char* fileType = new char[4];
-
-		if((*it).attr == Filesystems::FATAttributes::shortNameFile) {
-			strncpy(fileType, "FILE", 4);
-		} 
-		else {
-			strncpy(fileType, "DIR", 3);
-		}
-		
-		terminal_printf("%s \t\t %s @ %x\n", (*it).name, fileType, (*it).location);
-	}
-
-	return dir;
-}
-
-std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, size_t sectorIndex, string path) {
+std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, char * path) {
 	std::vector<Filesystems::DirectoryEntry> dir = std::vector<Filesystems::DirectoryEntry>();
 
 	// this function splits "path" into tokens delimited by '/' and then extracts out each folder and 
@@ -221,13 +221,17 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 	bool found = false;
 	bool error = false;
 	size_t currentSector = 512; // 512 = root dir table sector
+
 	while(!found && !error) {
-		std::vector<Filesystems::DirectoryEntry> cDir = ATA::found_devices[deviceIndex].readDirectoryTable(currentSector);
+		std::vector<Filesystems::DirectoryEntry> cDir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
 
 		for(auto it = cDir.begin(); it != cDir.end(); it++) {
-			if((*it).name == path) {
-				dir = ATA::found_devices[deviceIndex].readDirectoryTable(currentSector);
+			if(strcmp((char*)(*it).name, path) == 0) {
+				int dirSector = found_devices[deviceIndex]->getSectorIndices((*it).location)[0];
+				dir = found_devices[deviceIndex]->readDirectoryTable(dirSector);
+				
 				found = true;
+				break;
 			}
 		}
 	}
@@ -240,16 +244,12 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 	return dir;
 }
 
-void ATA::grabAll() {
-	ATA::found_devices = ATA::findATA();
-}
-
 void init_ata() {
 	//timer_phase(1000);
 	//set_irq_handler(0, (isr_t)&timer_handler);
 
 	terminal_writestring("------------------------------------\n");
 	terminal_writestring("Identifying ATA devices...\n");
-	ATA::grabAll();
+	ATA::findATA();
 	terminal_writestring("------------------------------------\n");
 }

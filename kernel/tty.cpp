@@ -10,11 +10,12 @@
 
 #include <gfx/vga.h>
 #include <gfx/vesa.h>
+#include <gfx/surface.h>
 
 #include <devices/keyboard.h>
 
 static const size_t VGA_WIDTH = 120;
-static const size_t VGA_HEIGHT = 50;
+static const size_t VGA_HEIGHT = 60;
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
 size_t terminal_row;
@@ -67,12 +68,11 @@ void terminal_writeerror(char* data) {
 void terminal_scrollup(void) {
 	terminal_row = VGA_HEIGHT-1;
 
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
-			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = terminal_buffer[index+VGA_WIDTH];//vga_entry(' ', terminal_color);
-		}
+	for(auto it = screen_surfaces.begin(); it != screen_surfaces.end(); it++) {
+		(*it).scrollUp(Y_FONTWIDTH+1);
 	}
+
+	update_buffer(true);
 }
 
 void terminal_setcolor(uint8_t color) {
@@ -196,12 +196,13 @@ void update_cursor(int row, int col)
 }
 
 void tty_update() {
-		terminal_writestring("kernel", RGBA(0xDDDDDD));
-		terminal_writestring("> ", RGBA(0xFFFFFF));
-		update_buffer(false);
+	terminal_writestring("[", RGBA(0xe4e4c8));
+	terminal_writestring("root@DEV-PC ", RGBA(0xff6064));
+	terminal_writestring("0:/", RGBA(0x288acc));
+	terminal_writestring("] ", RGBA(0xe4e4c8));
+	update_buffer(false);
 
-		getsn(&kb_buffer[0], 1024);
+	getsn(&kb_buffer[0], 1024);
 
-		Command::Parse(kb_buffer);
-	
+	Command::Parse(kb_buffer);
 }
