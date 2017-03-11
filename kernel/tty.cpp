@@ -4,6 +4,7 @@
 //#include <std/string.h>
 
 #include <tty.h>
+#include <env.h>
 #include <command.h>
 
 #include <cpu/io.h>
@@ -156,13 +157,24 @@ void terminal_multistring(char* data1, RGBA color1, char* data2, RGBA color2) {
 
 void terminal_printf(const char* fmt, ...) {
 	va_list parameters;
-	char temp_buffer[50] = {0};
+	char temp_buffer[80] = {0};
 
 	va_start(parameters, fmt);
 	vsprintf(temp_buffer, fmt, parameters);
 	terminal_writestring((char*)temp_buffer);
 	va_end(parameters);
 }
+
+void terminal_printf_rgba(const char* fmt, RGBA color, ...) {
+	va_list parameters;
+	char temp_buffer[80] = {0};
+
+	va_start(parameters, color);
+	vsprintf(temp_buffer, fmt, parameters);
+	terminal_writestring((char*)temp_buffer, color);
+	va_end(parameters);
+}
+
 
 size_t tty_get_cursor_x() {
 	return terminal_column;
@@ -197,8 +209,12 @@ void update_cursor(int row, int col)
 
 void tty_update() {
 	terminal_writestring("[", RGBA(0xe4e4c8));
-	terminal_writestring("root@DEV-PC ", RGBA(0xff6064));
-	terminal_writestring("0:/", RGBA(0x288acc));
+	terminal_writestring((char*)ENV::get("user"), RGBA(0xff6064));
+	terminal_writestring("@DEV-PC ", RGBA(0xff6064));
+	
+	terminal_writestring("0:", RGBA(0x288acc));
+	terminal_writestring((char*)ENV::get("cd"), RGBA(0x288acc));
+	
 	terminal_writestring("] ", RGBA(0xe4e4c8));
 	update_buffer(false);
 

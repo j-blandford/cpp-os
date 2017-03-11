@@ -35,6 +35,8 @@ public:
         (*this).a = 0xFF; // this constructor only supports 32-bit colour, no transparency
     }
 
+    RGBA() : r(0xFF), g(0xFF), b(0xFF) { } // default to pure white if values aren't specified
+
     ~RGBA() { }
 
     string toHex();

@@ -6,6 +6,7 @@
 #include <arch/i386/timer.h>
 
 #include <tty.h>
+#include <env.h>
 
 #include <cpu/multiboot.h>
 #include <cpu/gdt.h>
@@ -39,9 +40,10 @@ void kernel_main(multiboot_info_t * mb_info, uint32_t stack_size, uintptr_t esp)
 	PIT::initTimer(); // IRQ0
 	//PIT::testTimer();
 
-
 //	init_pci();
 	init_ata();
+
+	ENV::setup();
 
  	terminal_printf("total memory:  %d kb\n",mb_info->mem_upper + mb_info->mem_lower);
  	terminal_printf("vga:  %dx%d (%d) \n",frame_width, frame_height, frame_pitch);

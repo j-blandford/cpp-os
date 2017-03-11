@@ -245,8 +245,9 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 					if(strcmp((char*)(*it).name, folderSplit) == 0) {
 						currentSector = found_devices[deviceIndex]->getSectorIndices((*it).location)[0];
 						dir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
-						
-						foundInner = true;
+
+						foundInner = ((*it).attr != Filesystems::FATAttributes::shortNameFile);
+
 						break;
 					}
 				}

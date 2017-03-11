@@ -32,6 +32,7 @@ void terminal_writestring(const char* data, RGBA color);
 void terminal_multistring(char* data1, RGBA color1, char* data2, RGBA color2);
 
 void terminal_printf(const char* fmt, ...);
+void terminal_printf_rgba(const char* fmt, RGBA color, ...);
 
 size_t tty_get_cursor_x();
 void tty_set_cursor_x(size_t x);

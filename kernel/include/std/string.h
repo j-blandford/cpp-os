@@ -61,17 +61,21 @@ public:
 	friend string operator+( char c, const string& s );
 
 	bool operator== (const string& rhs) {
-		return strcmp(buff, (char*)rhs)  == 0;
+		return strcmp(buff, rhs.buff) == 0;
 	}
-	bool operator== (const char*   rhs) {
+	bool operator== (const char* rhs) {
 		return strcmp(buff, rhs) == 0;
 	}
 
 	string& operator+=( const string& s2 ) {
-		strncpy( this->buff + this->length, s2.buff, s2.length);
+		char* newBuff = new char[this->length+s2.length];
 
+		strncpy( newBuff, this->buff, this->length);
+		strncpy( newBuff + this->length, s2.buff, s2.length);
+
+		this->buff = newBuff;
 		this->length += s2.length;
-	
+
 		return *this;
 	}
 
@@ -82,10 +86,21 @@ public:
 		newBuff[this->length] = s2;
 
 		this->buff = newBuff;
-		this->length += 2;
+		this->length += 1;
 	
 		return *this;
 	}
+
+	// string& operator+=( const char* s2 ) {
+	// 	char* newBuff = new char[this->length+strlen((char*)s2)+1];
+	// 	strncpy( newBuff, buff, this->length);
+	// 	strncpy( *(&newBuff+this->length), (char*)s2, strlen((char*)s2));
+
+	// 	this->buff = newBuff;
+	// 	this->length = strlen(this->buff);
+	
+	// 	return *this;
+	// }
 
 	operator char*() const { 
 		char * nullBuffer = new char[this->length+1];
