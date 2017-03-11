@@ -32,14 +32,9 @@ namespace Filesystems {
 		std::vector<uint16_t> *chain = new std::vector<uint16_t>();
 
 		uint16_t current = start;
-		while(current != 0xFF) {
-			terminal_printf("\t\t  new chain... %x\n", current);
-			update_buffer(false);
-
+		while(current < 0xF8) {
 			(*chain).push_back(current);
 			current = table[current*2]; // | table[current*2+1] >> 8;
-
-
 		}
 
 		return *chain;
@@ -101,9 +96,6 @@ namespace Filesystems {
 			int sectorIndex = (chain[i] - 2) * header_info.secPerCluster + dataStart;
 
 			ATA::read(bus, drive, &chainBuffer, 1, sectorIndex);
-
-			//memcpy(&(buffer[i*header_info.sectorSize]), block, header_info.sectorSize);
-			// terminal_printf("%d ", sectorIndex);
 		}
 
 		return chainBuffer;
@@ -139,11 +131,6 @@ namespace Filesystems {
 		uint8_t* tempFat = new uint8_t[512];
 		ATA::read(bus, drive, &tempFat, 1, header_info.numReservedSectors);
 		memcpy(&(fat.table), tempFat, 512);
-
-		// Now we can do some directory management (and testing)
-		// std::vector<uint16_t> chain = this->fat.follow(0x02); // should follow the "boot" directory chain
-
-		// uint16_t* clusters = getChain(chain); // grab the data from the cluster chain
 
 		return true;
 	}

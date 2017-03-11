@@ -216,27 +216,63 @@ void ATA::findATA() {
 std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, char * path) {
 	std::vector<Filesystems::DirectoryEntry> dir = std::vector<Filesystems::DirectoryEntry>();
 
+	int folderDepth = 0;
+	int pathIndex = 0;
+	while(path[pathIndex] != '\0') {
+		if(path[pathIndex] == '/') 
+			folderDepth++;
+
+		pathIndex++;
+	}
+
 	// this function splits "path" into tokens delimited by '/' and then extracts out each folder and 
 	//		maps the structure (from the root node) to find the right table directory entry sector
-	bool found = false;
+	bool foundPath = false;
 	bool error = false;
 	size_t currentSector = 512; // 512 = root dir table sector
 
-	while(!found && !error) {
-		std::vector<Filesystems::DirectoryEntry> cDir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
+	if(strlen(path) > 2) {
+		while(!foundPath && !error) {
 
-		for(auto it = cDir.begin(); it != cDir.end(); it++) {
-			if(strcmp((char*)(*it).name, path) == 0) {
-				int dirSector = found_devices[deviceIndex]->getSectorIndices((*it).location)[0];
-				dir = found_devices[deviceIndex]->readDirectoryTable(dirSector);
-				
-				found = true;
-				break;
+			char* folderSplit = strtok(path, "/");
+			int folderCount = 0;
+			while(folderSplit != NULL) {		
+				bool foundInner = false;
+
+				std::vector<Filesystems::DirectoryEntry> currDir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
+
+				for(auto it = currDir.begin(); it != currDir.end(); it++) {
+					if(strcmp((char*)(*it).name, folderSplit) == 0) {
+						currentSector = found_devices[deviceIndex]->getSectorIndices((*it).location)[0];
+						dir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
+						
+						foundInner = true;
+						break;
+					}
+				}
+
+				if(foundInner) {
+					currDir = dir;
+					folderCount++;
+
+					if(folderCount >= folderDepth) foundPath = true;
+				} 
+				else {
+					// folder not found
+					error = true;
+				}
+
+				folderSplit = strtok(NULL, "/");
 			}
 		}
 	}
+	else {
+		// this means we just list the root directory
+		dir = found_devices[deviceIndex]->readDirectoryTable(512);
+		foundPath = true;
+	}
 
-	if(error || !found) {
+	if(error || !foundPath) {
 		terminal_printf("Error: directory not found\n");
 	}
 	

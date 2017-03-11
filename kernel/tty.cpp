@@ -15,7 +15,7 @@
 #include <devices/keyboard.h>
 
 static const size_t VGA_WIDTH = 120;
-static const size_t VGA_HEIGHT = 60;
+static const size_t VGA_HEIGHT = 45;
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
 size_t terminal_row;
@@ -24,7 +24,7 @@ uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
 static int X_FONTWIDTH = 8;
-static int Y_FONTWIDTH = 15; 
+static int Y_FONTWIDTH = 16; 
 static vec2 cursor_pos = { 0, 0 };
 
 char kb_buffer[1024];

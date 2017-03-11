@@ -30,13 +30,8 @@ std::vector<string> Command::split(char* command) {
 void Command::Parse(char * buffer) {
 	std::vector<string> tokens = Command::split(buffer);
 
-	// for(int i = 0; i < tokens.size(); i++) {
-	// 	terminal_printf("%s(l) %d\n", (char*)tokens[i], tokens[i] == "ls");
-	// }
-
 	if(tokens[0] == "ls") {
-		//ATA::getDirectoryPath(0, "boot");
-		init_pci();
+		ATA::getDirectoryPath(0, "/");
 		update_buffer(false);
 	} 
 	else if(tokens[0] == "listpci") {
@@ -45,8 +40,6 @@ void Command::Parse(char * buffer) {
 	}
 
 	else if(strncmp(tokens[0], "ls", 2) == 0) {
-	    //std::vector<Filesystems::DirectoryEntry> dir = found_devices[0]->readDirectoryTable(512);
-
 		std::vector<Filesystems::DirectoryEntry> dir = ATA::getDirectoryPath(0, tokens[1]);
 
 		for(auto it = dir.begin(); it != dir.end(); it++) {
