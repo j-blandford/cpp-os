@@ -71,11 +71,16 @@ void Command::Parse(char * buffer) {
 				col = RGBA(0xc3e88d);
 			}
 			
-			terminal_printf_rgba("%s \t\t %s @ %x\n", col, (*it).name, fileType, (*it).location);
+			terminal_printf_rgba("%s ", col, (*it).name);
+
+			if(strlen((*it).name) < 11) {
+				terminal_writestring("\t");
+			}
+
+			terminal_printf_rgba("\t %s @ %x\n", col, fileType, (*it).location);
 		}
 
-
-	    update_buffer(false);
+		update_buffer(false);
 	}
 
 	else if(strncmp(tokens[0], "cd", 2) == 0) {

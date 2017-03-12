@@ -210,8 +210,10 @@ void update_cursor(int row, int col)
 void tty_update() {
 	terminal_writestring("[", RGBA(0xe4e4c8));
 	terminal_writestring((char*)ENV::get("user"), RGBA(0xff6064));
-	terminal_writestring("@DEV-PC ", RGBA(0xff6064));
-	
+	terminal_writestring("@", RGBA(0xff6064));
+	terminal_writestring((char*)ENV::get("comp-name"), RGBA(0xff6064));
+	terminal_writestring(" ", RGBA(0xff6064));
+
 	terminal_writestring("0:", RGBA(0x288acc));
 	terminal_writestring((char*)ENV::get("cd"), RGBA(0x288acc));
 	

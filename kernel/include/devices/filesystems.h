@@ -94,9 +94,7 @@ namespace Filesystems {
 
 		uint8_t* dirBytes; 
 
-		FAT16() { 
-
-		}
+		FAT16() { }
 		FAT16(const uint16_t& port, const int& bus, const int& drive) : port(port), bus(bus), drive(drive) { }
 		~FAT16() { }
 

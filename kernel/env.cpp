@@ -40,6 +40,7 @@ void ENV::set(string envVar, string envVal) {
 void ENV::setup() {
 	ENV::set("cd", "/");
 	ENV::set("user", "james");
+	ENV::set("comp-name", "localhost");
 	//ENV::set()
 
 	// terminal_printf("%x\n", &environment);

@@ -216,6 +216,8 @@ void ATA::findATA() {
 std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, char * path) {
 	std::vector<Filesystems::DirectoryEntry> dir = std::vector<Filesystems::DirectoryEntry>();
 
+	// First we determine how many folders deep the path is: eg. "/home" is ONE deep, "/home/james" is TWO deep
+	// this gives us a way of determining when we can stop the search below
 	int folderDepth = 0;
 	int pathIndex = 0;
 	while(path[pathIndex] != '\0') {
@@ -225,28 +227,30 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 		pathIndex++;
 	}
 
-	// this function splits "path" into tokens delimited by '/' and then extracts out each folder and 
-	//		maps the structure (from the root node) to find the right table directory entry sector
+	// this function splits "path" into tokens delimited by '/' and then extracts out each folder, 
+	//		mapping the structure (from the root node) to find the right table directory entry sector
 	bool foundPath = false;
 	bool error = false;
 	size_t currentSector = 512; // 512 = root dir table sector
 
 	if(strlen(path) > 2) {
 		while(!foundPath && !error) {
-
+			// Now we split the path by '/' and search for that token
 			char* folderSplit = strtok(path, "/");
-			int folderCount = 0;
+			int folderCount = 1; // keep track of how many folders deep we are currently searching in (giving us a stop condition)
+
 			while(folderSplit != NULL) {		
 				bool foundInner = false;
 
 				std::vector<Filesystems::DirectoryEntry> currDir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
 
+				// here's the search in the current working directory for the particular folder name (one of the tokens of the path)
 				for(auto it = currDir.begin(); it != currDir.end(); it++) {
 					if(strcmp((char*)(*it).name, folderSplit) == 0) {
 						currentSector = found_devices[deviceIndex]->getSectorIndices((*it).location)[0];
 						dir = found_devices[deviceIndex]->readDirectoryTable(currentSector);
 
-						foundInner = ((*it).attr != Filesystems::FATAttributes::shortNameFile);
+						foundInner = ((*it).attr != Filesystems::FATAttributes::shortNameFile); // only accept directories!
 
 						break;
 					}
@@ -256,10 +260,13 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 					currDir = dir;
 					folderCount++;
 
-					if(folderCount >= folderDepth) foundPath = true;
+					// is this the last folder? if so, just escape the while loop and return this directory
+					if(folderCount >= folderDepth) {
+						foundPath = true;
+						error = false;
+					}
 				} 
 				else {
-					// folder not found
 					error = true;
 				}
 
@@ -273,7 +280,7 @@ std::vector<Filesystems::DirectoryEntry> ATA::getDirectoryPath(int deviceIndex, 
 		foundPath = true;
 	}
 
-	if(error || !foundPath) {
+	if(error) {
 		terminal_printf("Error: directory not found\n");
 	}
 	

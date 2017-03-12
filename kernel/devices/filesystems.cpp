@@ -192,7 +192,11 @@ namespace Filesystems {
 						length++;
 					}
 				}
-				index += 32; // skip the short-folder name representation at the moment
+				
+				// now we grab some details which are located in the short-name entry...
+				index += 32; 
+
+				dirEntry->attr = static_cast<FATAttributes>(dirBytes[index+11]);
 			}
 			else if(dirEntry->attr == FATAttributes::noEntry) {
 				// there isn't a file here, so just skip to the next index entry
